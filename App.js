@@ -2,18 +2,32 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import LogIn from './screens/login';
 import SignUp from './screens/signup';
-import { Appbar } from 'react-native-paper';
+import { Appbar, Title } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import 'react-native-gesture-handler';
+import { createStackNavigator } from '@react-navigation/stack';
 
+const Stack = createStackNavigator();
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <NavigationContainer style={styles.container}>
+      <Stack.Navigator>
+        <Stack.Screen name="LogIn"  component={LogIn} />
+        <Stack.Screen name="SignUp"  component={SignUp} />
+
+    {/* </SafeAreaProvider> */}
+      {/* <SafeAreaProvider> */}
       {/* <StatusBar style="auto" /> */}
-      <LogIn />
+      {/* <LogIn /> */}
 
 
 
-    </SafeAreaProvider>
+    
+    </Stack.Navigator>
+      </NavigationContainer>
+    
 
 
   );
