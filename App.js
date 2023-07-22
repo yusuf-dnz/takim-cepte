@@ -8,26 +8,27 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
+import { initializeApp } from 'firebase/app';
 
 const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer style={styles.container}>
       <Stack.Navigator>
-        <Stack.Screen name="LogIn"  component={LogIn} />
-        <Stack.Screen name="SignUp"  component={SignUp} />
+        <Stack.Screen name="LogIn" component={LogIn} options={{ headerShown: false }} />
+        <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
 
-    {/* </SafeAreaProvider> */}
-      {/* <SafeAreaProvider> */}
-      {/* <StatusBar style="auto" /> */}
-      {/* <LogIn /> */}
+        {/* </SafeAreaProvider> */}
+        {/* <SafeAreaProvider> */}
+        {/* <StatusBar style="auto" /> */}
+        {/* <LogIn /> */}
 
 
 
-    
-    </Stack.Navigator>
-      </NavigationContainer>
-    
+
+      </Stack.Navigator>
+    </NavigationContainer>
+
 
 
   );

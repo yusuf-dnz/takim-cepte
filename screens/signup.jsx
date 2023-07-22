@@ -1,53 +1,86 @@
 import { useState } from 'react';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+
 // import { NativeBaseProvider, Box } from "native-base";
 
 
 
 export default function SignUp({ navigation }) {
-
+  const [email, setMail] = useState('');
   const [password, setPassword] = useState('');
+  const [rePassword, setRepeatPassword] = useState('');
+  const [passwordMatches, setPasswordMatches] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const auth = getAuth();
+createUserWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ..
+  });
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   }
 
+  const passwordCheck = () => {
+    if (password != rePassword) {
+      console.log("şifre eşleşmedi kontrol et");
+      setPasswordMatches(true);
+    }
+    else {
+      setPasswordMatches(false);
+    } return 0; //// eşleştiği durum için gönderme yapabilirisin
+  }
+
 
   return (
     <SafeAreaProvider style={styles.container}>
-      {/* <Avatar.Image style={styles.avatar} size={64} source={""} /> */}
+
       <View style={styles.view}>
         <TextInput style={styles.input}
           label="Email"
-        // value={""}
-        // onChangeText={""}
+          value={email}
+          onChangeText={(text) => setMail(text)}
         />
-        <TextInput style={styles.input}
-          label="Password"
-          // value={""}
-          // onChangeText={""}
-          secureTextEntry={true}
 
-        />
-        <View style={{display:'flex'}}>
         <TextInput style={styles.input}
           label="Password"
           value={password}
-          onChangeText={(text) => setPassword(text)}
-          secureTextEntry={showPassword}
+          onChangeText={(text) => { setPassword(text); }}
+          secureTextEntry={!showPassword}
         />
-        <Button style={{ width: 20, }} icon="eye" mode="text" onPressOut={togglePasswordVisibility} />
+
+        <View style={{ display: 'flex' }}>
+          <TextInput style={styles.input}
+            label="Repeat the password"
+            value={rePassword}
+            onChangeText={(text) => setRepeatPassword(text)}
+            secureTextEntry={!showPassword}
+            error={passwordMatches}
+          />
+
+          <Button style={{ width: 20 }} icon="eye" mode="text" onPress={togglePasswordVisibility} />
+
         </View>
-        
 
 
+        <Button style={{ marginTop: 20, }} mode="contained-tonal"
+          onPress={() => {
+            passwordCheck();
+            getAuth();
 
-
-        <Button style={{ marginTop: 20, }} mode="contained-tonal" onPress={() => console.log('signup')}>
+          }}>
           Sign Up
         </Button>
 

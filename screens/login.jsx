@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,6 +8,14 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 
 export default function LogIn({ navigation }) {
+
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  }
+
   return (
     <SafeAreaProvider style={styles.container}>
       {/* <Avatar.Image style={styles.avatar} size={64} source={""} /> */}
@@ -16,11 +25,16 @@ export default function LogIn({ navigation }) {
         // value={""}
         // onChangeText={""}
         />
-        <TextInput style={styles.input}
-          label="Password"
-        // value={""}
-        // onChangeText={""}
-        />
+        <View style={{ display: 'flex' }}>
+          <TextInput style={styles.input}
+            label="Password"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            secureTextEntry={!showPassword}
+          />
+          <Button style={{ width: 20, alignItems: 'flex-end' }} icon="eye" mode="text" onPressOut={togglePasswordVisibility} />
+
+        </View>
 
         <Button style={{ marginTop: 20, }} mode="contained-tonal" onPress={() => console.log('Log In')}>
           Log In
