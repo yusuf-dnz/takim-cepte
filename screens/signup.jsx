@@ -4,45 +4,38 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { loginApp, register } from '../firebase';
 
 // import { NativeBaseProvider, Box } from "native-base";
 
 
 
 export default function SignUp({ navigation }) {
-  const [email, setMail] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRepeatPassword] = useState('');
   const [passwordMatches, setPasswordMatches] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const auth = getAuth();
-createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // ..
-  });
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   }
 
-  const passwordCheck = () => {
+
+  const handleSignUp = async e => {
     if (password != rePassword) {
-      console.log("şifre eşleşmedi kontrol et");
+      console.log("şifre eşleşmedi kontrol et");//toast message ekle
       setPasswordMatches(true);
     }
     else {
       setPasswordMatches(false);
-    } return 0; //// eşleştiği durum için gönderme yapabilirisin
-  }
+      const user = await register(email, password)
+      console.log(JSON.stringify(user, null, 2))
 
+      console.log("user kaydı bloğu")
+
+    } return 0; // eşleştiği durum için gönderme yapabilirisin
+  }
 
   return (
     <SafeAreaProvider style={styles.container}>
@@ -51,7 +44,7 @@ createUserWithEmailAndPassword(auth, email, password)
         <TextInput style={styles.input}
           label="Email"
           value={email}
-          onChangeText={(text) => setMail(text)}
+          onChangeText={(text) => setEmail(text)}
         />
 
         <TextInput style={styles.input}
@@ -70,26 +63,34 @@ createUserWithEmailAndPassword(auth, email, password)
             error={passwordMatches}
           />
 
+          {/*göz butonu */}
           <Button style={{ width: 20 }} icon="eye" mode="text" onPress={togglePasswordVisibility} />
 
         </View>
 
 
-        <Button style={{ marginTop: 20, }} mode="contained-tonal"
+        <Button 
+        style={{
+          marginTop: 20,
+        }}
+          mode="contained-tonal"
           onPress={() => {
-            passwordCheck();
-            getAuth();
+            handleSignUp();
 
           }}>
           Sign Up
         </Button>
 
-        <Button style={{ marginTop: 10, alignItems: 'flex-end' }} onPress={() => navigation.navigate('LogIn')}>
+        <Button 
+        style={{
+          marginTop: 10,
+          alignItems: 'flex-end',
+        }}
+          onPress={() => navigation.navigate('LogIn')}>
           Log In
         </Button>
       </View>
     </SafeAreaProvider>
-
 
   )
 }

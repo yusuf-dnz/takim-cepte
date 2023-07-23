@@ -4,11 +4,12 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-// import { NativeBaseProvider, Box } from "native-base";
+import { authState, loginApp } from '../firebase';
 
 
 export default function LogIn({ navigation }) {
 
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -16,34 +17,47 @@ export default function LogIn({ navigation }) {
     setShowPassword(!showPassword);
   }
 
+  const handleLogIn = async e => {
+    const user = await loginApp(email, password)
+    console.log(JSON.stringify(user, null, 2))
+    navigation.navigate('HomeScreen');
+  }
+
+  
+  
+
   return (
     <SafeAreaProvider style={styles.container}>
-      {/* <Avatar.Image style={styles.avatar} size={64} source={""} /> */}
+
       <View style={styles.view}>
+
         <TextInput style={styles.input}
           label="Email"
-        // value={""}
-        // onChangeText={""}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
         />
-        <View style={{ display: 'flex' }}>
-          <TextInput style={styles.input}
-            label="Password"
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            secureTextEntry={!showPassword}
-          />
-          <Button style={{ width: 20, alignItems: 'flex-end' }} icon="eye" mode="text" onPressOut={togglePasswordVisibility} />
 
-        </View>
+        <TextInput style={styles.input}
+          label="Password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          secureTextEntry={!showPassword}
+        />
 
-        <Button style={{ marginTop: 20, }} mode="contained-tonal" onPress={() => console.log('Log In')}>
+        <Button style={{ width: 20, alignItems: 'flex-end' }} icon="eye" mode="text" onPressOut={togglePasswordVisibility} />
+
+        <Button style={{ marginTop: 20, }} mode="contained-tonal" onPress={() => {
+          handleLogIn(email, password);
+        }}>
           Log In
         </Button>
 
         <Button style={{ marginTop: 10, alignItems: 'flex-end' }} onPress={() => navigation.navigate('SignUp')}>
           Sign Up
         </Button>
+
       </View>
+
     </SafeAreaProvider>
   )
 
@@ -70,8 +84,5 @@ const styles = StyleSheet.create(
       backgroundColor: 'white',
     },
 
-    // avatar: {
-
-    // }
   }
 )
