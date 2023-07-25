@@ -21,14 +21,6 @@ const Stack = createStackNavigator();
 
 export default function App() {
 
-  // useEffect(() => {
-  //   onAuthStateChanged((user) => {
-  //     if(!user) {
-        
-  //     }
-  //   });
-  // }, []);
-
   return (
     <NavigationContainer style={styles.container}>
       <Stack.Navigator>
@@ -36,7 +28,6 @@ export default function App() {
         <Stack.Screen name="LogIn" component={LogIn} options={{ headerShown: false }} />
         <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
         <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
-
 
       </Stack.Navigator>
     </NavigationContainer>

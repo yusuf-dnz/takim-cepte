@@ -31,7 +31,7 @@ export default function SignUp({ navigation }) {
       setPasswordMatches(false);
       const user = await register(email, password)
       console.log(JSON.stringify(user, null, 2))
-
+      navigation.navigate('HomeScreen');
       console.log("user kaydı bloğu")
 
     } return 0; // eşleştiği durum için gönderme yapabilirisin
