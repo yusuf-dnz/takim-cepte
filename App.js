@@ -20,16 +20,18 @@ const Stack = createStackNavigator();
 
 
 export default function App() {
+  console.log('app')
 
   return (
     <NavigationContainer style={styles.container}>
-      <Stack.Navigator>
+      <Stack.Navigator animationEnabled='true'>
 
         <Stack.Screen name="LogIn" component={LogIn} options={{ headerShown: false }} />
         <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false, title:'SEA'}} />
 
       </Stack.Navigator>
+      
     </NavigationContainer>
 
 

@@ -30,7 +30,7 @@ export default function SignUp({ navigation }) {
     else {
       setPasswordMatches(false);
       const user = await register(email, password)
-      console.log(JSON.stringify(user, null, 2))
+      // console.log(JSON.stringify(user, null, 2))
       navigation.navigate('HomeScreen');
       console.log("user kaydı bloğu")
 
@@ -64,12 +64,14 @@ export default function SignUp({ navigation }) {
           />
 
           {/*göz butonu */}
-          <Button style={{ width: 20 }} icon="eye" mode="text" onPress={togglePasswordVisibility} />
+          <Button style={{ width: 10, marginTop:10, }} icon="eye" col mode="text" onPress={togglePasswordVisibility} />
 
         </View>
 
 
         <Button 
+        buttonColor='#be75359f'
+        textColor='white'
         style={{
           marginTop: 20,
         }}

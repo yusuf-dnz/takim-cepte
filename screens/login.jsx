@@ -19,8 +19,8 @@ export default function LogIn({ navigation }) {
 
   const handleLogIn = async e => {
     const user = await loginApp(email, password)
-    console.log(JSON.stringify(user, null, 2))
-    navigation.navigate('HomeScreen');
+    // console.log(JSON.stringify(user, null, 2))
+    navigation.navigate('HomeScreen');// Cycle sorunu yok
   }
 
   
