@@ -8,8 +8,9 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 import { userActive } from "./screens/login";
-import { getFirestore, doc, setDoc,getDocs,collection } from "firebase/firestore";
+import { getFirestore, doc, setDoc} from "firebase/firestore";
 import { useState } from "react";
+import { getStorage } from "firebase/storage";
 
 
 
@@ -25,50 +26,5 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
-const db = getFirestore(app);
-
-
-export const register = async (email, password) => {
-  const { user } = await createUserWithEmailAndPassword(auth, email, password)
-  await setDoc(doc(db, "users", user.uid), {
-    email: email,
-    password: password,
-  });
-  return user
-}
-
-export const loginApp = async (email, password) => {
-  const { user } = await signInWithEmailAndPassword(auth, email, password)
-
-  return user
-
-}
-
-export const logOutApp = async () => {
-  await signOut(auth)
-  console.log("çıkış yapıldı")
-
-}
-
-
-export const eventLister = async () => {
-  var events=[];
-  const querySnapshot = await getDocs(collection(db, "events"));
-  querySnapshot.forEach((doc) => {
-    events.push(
-  doc.id
-
-);
-
-
-  });
-  // console.log(events)
-return events
-  
-}
-
-
-
-
-//const analytics = getAnalytics(app);
-
+export const db = getFirestore(app);
+// const analytics = getAnalytics(app);

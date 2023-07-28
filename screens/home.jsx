@@ -10,11 +10,16 @@ import Search from './search';
 import { StyleSheet } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ImageBackgroundBase } from 'react-native';
+import { useTheme } from 'react-native-paper';
+
 
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function HomeScreen({ navigation }) {
+  const theme = useTheme();
+  theme.colors.secondaryContainer = "transperent";
+  theme.colors.primaryContainer= "transperent";
 
 
   const auth = getAuth();
@@ -35,18 +40,15 @@ export default function HomeScreen({ navigation }) {
 
 
     <Tab.Navigator
-    
       initialRouteName="Home"
-      activeColor="#f0edf6"
-        inactiveColor="#3e2465"
-      barStyle={{ backgroundColor: 'rgba(64, 108, 255, 1)', height: 60, }}
-      indicatorStyle={{backgroundColor:'white'}}
+    
+      barStyle={{ backgroundColor: 'rgba(0, 0, 0, 0)', height: 60,  }}
       shifting='true'
-      tabBarIcon={ {focused: false, color: 'white'}}
-      // tabBarColor="#d5905366"
-
+      tabBarOptions={{
+        activeBackgroundColor: 'transparent',}}
+      
     >
-      <Tab.Screen name="Chat" options={{
+      <Tab.Screen name="Chat" options={{ 
         title: '', tabBarIcon: ({ color }) => (
           <MaterialCommunityIcons name="chat" color={'#fff'} size={26} />
         ),
@@ -54,7 +56,7 @@ export default function HomeScreen({ navigation }) {
 
       <Tab.Screen name="Search" options={{
         title: '',
-        
+
         tabBarIcon: ({ color }) => (
           <MaterialCommunityIcons name="earth" color={'#fff'} size={26} />
         ),

@@ -1,36 +1,44 @@
-import { View, Text, ScrollView, ImageBackground } from 'react-native'
+import { View, Text, ScrollView, ImageBackground, Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Avatar, Card, IconButton } from 'react-native-paper';
-import { collection, doc, setDoc } from "firebase/firestore";
-import { eventLister } from '../firebase';
-import StaticTopBar from '../components/statictopbar';
+import { db, eventLister } from '../firebase';
+import StaticTopBar from '../components/StaticTopBar';
+import { getFirestore, doc, setDoc, getDocs, collection, getDoc } from "firebase/firestore";
+
 
 
 export default function Search() {
 
 
-  const [events, setEvent] = useState([]);
+  const [events, setEvents] = useState([]);
 
-  const list = async e => {
-
-    const eventList = await eventLister();
-    setEvent(eventList);
-    // console.log(events);
-
-  }
 
   useEffect(() => {
-    list();
+    var eventArray = [];
+    const eventLister = async () => {
+      const querySnapshot = await getDocs(collection(db, "events"));
+      querySnapshot.forEach((doc) => {
+        eventArray.push(
+          doc.id
+        );
+      });
+      setEvents(eventArray)
+    }
+
+
+    eventLister();
   }, []);
+
+
 
   return (
     <View>
-        <StaticTopBar text={"TOPLULUK"}/>
 
       <ImageBackground
-        style={{ minHeight: '100%' }}
-        source={require('../assets/backgroundimg.jpg')}
+        style={{ height: Dimensions.get('window').height }}
+        source={require('../assets/bg.jpg')}
       >
+        <StaticTopBar text={"TOPLULUK"} />
 
         <ScrollView>
 
@@ -41,9 +49,9 @@ export default function Search() {
 
                 <Card.Title
                   key={index}
-                  style={{ margin: 10, borderRadius: 10, backgroundColor: 'rgba(64, 108, 175, 0.4)',  }}
+                  style={{ margin: 10, borderRadius: 10, backgroundColor: 'rgba(64, 108, 175, 0.4)', }}
                   title={event}
-                  titleStyle={{color:'white',fontWeight:'bold',fontSize:22,}}
+                  titleStyle={{ color: 'white', fontWeight: 'bold', fontSize: 22, }}
                   // subtitle="tmm"
                   left={(props) => <Avatar.Icon {...props} icon="earth" />}
                 // right={(props) => <IconButton {...props} icon="dots-vertical" onPress={() => {}} />}
@@ -51,7 +59,7 @@ export default function Search() {
               ))}
 
             </View>
-          
+
 
           </View>
         </ScrollView>

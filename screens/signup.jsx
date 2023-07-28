@@ -4,7 +4,8 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { loginApp, register } from '../firebase';
+import { auth, db, loginApp } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 // import { NativeBaseProvider, Box } from "native-base";
 
@@ -14,28 +15,35 @@ export default function SignUp({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRepeatPassword] = useState('');
-  const [passwordMatches, setPasswordMatches] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  var PasswordMatches = true;
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   }
 
+  const handleSignUp = async () => {
 
-  const handleSignUp = async e => {
     if (password != rePassword) {
       console.log("şifre eşleşmedi kontrol et");//toast message ekle
-      setPasswordMatches(true);
+      PasswordMatches=false;
     }
     else {
-      setPasswordMatches(false);
-      const user = await register(email, password)
-      // console.log(JSON.stringify(user, null, 2))
-      navigation.navigate('HomeScreen');
-      console.log("user kaydı bloğu")
+      console.log("şifre eşleşti");//toast message ekle
 
-    } return 0; // eşleştiği durum için gönderme yapabilirisin
+      PasswordMatches=true;
+      const { user } = await createUserWithEmailAndPassword(auth, email, password)
+      await setDoc(doc(db, "users", user.uid), {
+        email: email,
+        password: password,
+      });
+
+    }
+    return
   }
+
+ 
 
   return (
     <SafeAreaProvider style={styles.container}>
@@ -50,7 +58,7 @@ export default function SignUp({ navigation }) {
         <TextInput style={styles.input}
           label="Password"
           value={password}
-          onChangeText={(text) => { setPassword(text); }}
+          onChangeText={(text) => setPassword(text)}
           secureTextEntry={!showPassword}
         />
 
@@ -60,21 +68,21 @@ export default function SignUp({ navigation }) {
             value={rePassword}
             onChangeText={(text) => setRepeatPassword(text)}
             secureTextEntry={!showPassword}
-            error={passwordMatches}
+            error={!PasswordMatches}
           />
 
           {/*göz butonu */}
-          <Button style={{ width: 10, marginTop:10, }} icon="eye" col mode="text" onPress={togglePasswordVisibility} />
+          <Button style={{ width: 10, marginTop: 10, }} icon="eye" col mode="text" onPress={togglePasswordVisibility} />
 
         </View>
 
 
-        <Button 
-        buttonColor='#be75359f'
-        textColor='white'
-        style={{
-          marginTop: 20,
-        }}
+        <Button
+          buttonColor='#be75359f'
+          textColor='white'
+          style={{
+            marginTop: 20,
+          }}
           mode="contained-tonal"
           onPress={() => {
             handleSignUp();
@@ -83,14 +91,15 @@ export default function SignUp({ navigation }) {
           Sign Up
         </Button>
 
-        <Button 
-        style={{
-          marginTop: 10,
-          alignItems: 'flex-end',
-        }}
+        <Button
+          style={{
+            marginTop: 10,
+            alignItems: 'flex-end',
+          }}
           onPress={() => navigation.navigate('LogIn')}>
           Log In
         </Button>
+
       </View>
     </SafeAreaProvider>
 
@@ -117,8 +126,5 @@ const styles = StyleSheet.create(
       backgroundColor: 'white',
     },
 
-    // avatar: {
-
-    // }
   }
 )
