@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, ImageBackground, Dimensions, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { db, logOutApp } from '../firebase';
+import { auth, db } from '../firebase';
 import { Avatar, Button } from 'react-native-paper';
 import StaticTopBar from '../components/StaticTopBar';
 import { StyleSheet } from 'react-native';

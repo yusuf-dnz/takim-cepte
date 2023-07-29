@@ -7,7 +7,6 @@ import {
   signOut,
   onAuthStateChanged
 } from "firebase/auth";
-import { userActive } from "./screens/login";
 import { getFirestore, doc, setDoc} from "firebase/firestore";
 import { useState } from "react";
 import { getStorage } from "firebase/storage";

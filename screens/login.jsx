@@ -3,8 +3,7 @@ import { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { auth, authState, loginApp } from '../firebase';
+import { auth, authState } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 
@@ -33,6 +32,7 @@ export default function LogIn({ navigation }) {
 
         <TextInput style={styles.input}
           label="Email"
+          textColor='black'
           value={email}
           onChangeText={(text) => setEmail(text)}
         />

@@ -6,6 +6,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { auth, db, loginApp } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
+
 
 // import { NativeBaseProvider, Box } from "native-base";
 
@@ -37,8 +39,10 @@ export default function SignUp({ navigation }) {
       await setDoc(doc(db, "users", user.uid), {
         email: email,
         password: password,
+        displayName: user.displayName,
+        // createdDate: Timestamp.fromDate(new Date()),
       });
-
+      console.log(JSON.stringify(user, null, 2))
     }
     return
   }
