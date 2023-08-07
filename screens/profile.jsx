@@ -1,14 +1,30 @@
 import { View, Text, ScrollView, ImageBackground, Dimensions, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { auth, db } from '../firebase';
-import { Avatar, Button } from 'react-native-paper';
+import { auth, db, storage } from '../firebase';
+import { Avatar, Divider } from 'react-native-paper';
 import StaticTopBar from '../components/StaticTopBar';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Button } from 'react-native';
 import { getFirestore, doc, setDoc, getDocs, collection, getDoc } from "firebase/firestore";
 import { signOut } from 'firebase/auth';
-
+import { getDownloadURL, ref } from 'firebase/storage';
 
 export default function Profile({ navigation }) {
+    const userID = auth.currentUser.uid;
+    // const pictureLocation = 'UserAvatars/' + userID + '/pp.png'
+    // console.log(pictureLocation)
+
+    useEffect(() => {
+        // console.log("avatar")
+        // getDownloadURL(ref(storage, 'UserAvatars/' + userID + '/pp.png'))
+        //     .then(url => {
+        //         setUserPictureUrl(url);
+        //     })
+        //     .catch(error => {
+
+        //         console.error('Dosya çekilirken hata oluştu: ', error);
+        //     });
+
+    }, [])
 
     const handleLogOut = async e => {
         await signOut(auth)
@@ -21,7 +37,7 @@ export default function Profile({ navigation }) {
 
         const getUserProfile = async () => {
 
-            const docRef = doc(db, "users", "w3Vz5AiqWiReHHum2a9YImBL3qw1");
+            const docRef = doc(db, "users", userID);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -41,36 +57,34 @@ export default function Profile({ navigation }) {
 
     return (
         <View>
-            <ImageBackground
-                style={{ height: Dimensions.get('window').height }}
-                source={require('../assets/bg.jpg')}
+            
+            <StaticTopBar text={"PROFİL"} />
+
+            <ScrollView
+                style={{ marginBottom: 50 }}
             >
-                <StaticTopBar text={"PROFİL"} /> 
+                {/* <Avatar.Image size={Dimensions.get('window').width} style={{borderRadius:0,backgroundColor:'transparent'}} source={require('../assets/ism.png') } /> */}
+                <View style={styles.container}>
+                    <Image source={{ uri: userProfileData.storageProfileImageURL }} style={styles.image} resizeMode="cover" />
+                </View>
 
-                <ScrollView>
-                    {/* <Avatar.Image size={Dimensions.get('window').width} style={{borderRadius:0,backgroundColor:'transparent'}} source={require('../assets/ism.png') } /> */}
-                    <View style={styles.container}>
-                        <Image source={require('../assets/ism.png')} style={styles.image} resizeMode="cover" />
-                    </View>
+                {/* Açıklama alanı */}
+                <Divider style={{ height: 5 }} />
+                <View style={{ marginTop: 10, padding: 10, backgroundColor: 'transparent', minHeight: 150, }}>
+                    <Text style={{ color: 'black' }}>{userProfileData.userDescription}</Text>
+                </View>
 
-                    {/* Açıklama alanı */}
+                
+                <Button
+                    onPress={handleLogOut}
+                    title="Log Out"
+                    color="blue"
+                    touchSoundDisabled={true}
 
-                    <View style={{marginTop:10,padding:10,backgroundColor:'rgba(0, 0, 0, 0.2)',minHeight:150, }}>
-                        <Text style={{color:'white'}}>{userProfileData.userDescription}</Text>
-                    </View>
+                />
 
+            </ScrollView>
 
-                    <Button
-                        style={{
-                            marginTop: 10,
-                            alignItems: 'flex-end',
-                        }}
-                        onPress={() => handleLogOut()}>
-                        Çıkış yap
-                    </Button>
-
-                </ScrollView>
-            </ImageBackground>
         </View>
     )
 }

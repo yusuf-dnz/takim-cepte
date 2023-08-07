@@ -1,76 +1,58 @@
-import { View, Text, Image, ScrollView, ImageBackground, ImageBackgroundComponent } from 'react-native'
-import React, { useEffect } from 'react'
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { TextInput, Avatar, Button, Title } from 'react-native-paper';
-import { authState, logOutApp, loginApp } from '../firebase';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import Chat from './chat';
+import { View, Text } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import ChatList from './chat_list';
 import Profile from './profile';
 import Search from './search';
 import { StyleSheet } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ImageBackgroundBase } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { createBottomTabNavigator, useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 
-
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function HomeScreen({ navigation }) {
-  const theme = useTheme();
-  theme.colors.secondaryContainer = "transperent";
-  theme.colors.primaryContainer= "transperent";
-
-
-  const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-
-      const uid = user.uid;
-      navigation.navigate('HomeScreen')
-
-      console.log("giriş yapılmış")
-    } else {
-
-      navigation.navigate('LogIn')
-    }
-  });
-
   return (
-
-
     <Tab.Navigator
       initialRouteName="Home"
-    
-      barStyle={{ backgroundColor: 'rgba(0, 0, 0, 0)', height: 60,  }}
-      shifting='true'
-      tabBarOptions={{
-        activeBackgroundColor: 'transparent',}}
-      
+      barStyle={{ backgroundColor: 'rgb(255, 200, 0)' }}
+      tabBarOpr
+      screenOptions={{
+        headerShown: false
+      }}
     >
-      <Tab.Screen name="Chat" options={{ 
-        title: '', tabBarIcon: ({ color }) => (
-          <MaterialCommunityIcons name="chat" color={'#fff'} size={26} />
+      <Tab.Screen 
+      name="ChatList" 
+      options={{
+        title: 'Messages', 
+        tabBarIcon: ({ color }) => (
+          <MaterialCommunityIcons name="chat" color={'blue'} size={26} />
         ),
-      }} component={Chat} />
+      }} 
+      component={ChatList} 
+      />
 
-      <Tab.Screen name="Search" options={{
-        title: '',
+      <Tab.Screen 
+      name="Search" 
+      options={{
+        title: 'Search',
 
         tabBarIcon: ({ color }) => (
-          <MaterialCommunityIcons name="earth" color={'#fff'} size={26} />
+          <MaterialCommunityIcons name="earth" color={'blue'} size={26} />
         ),
-      }} component={Search} />
+      }} 
+      component={Search} />
 
-      <Tab.Screen name="Profile" options={{
-        title: '',
+      <Tab.Screen 
+      name="Profile" 
+      options={{
+        title: 'Profile',
         tabBarIcon: ({ color }) => (
-          <MaterialCommunityIcons name="account-arrow-right" color={'#fff'} size={26} />
+          <MaterialCommunityIcons name="account-arrow-right" color={'blue'} size={26} />
         ),
-      }} component={Profile} />
-
+      }} 
+      component={Profile} />
     </Tab.Navigator>
-
 
   )
 }

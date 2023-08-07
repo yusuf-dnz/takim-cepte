@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { TextInput, Avatar, Button } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { auth, authState } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 
 
 export default function LogIn({ navigation }) {
@@ -20,10 +20,27 @@ export default function LogIn({ navigation }) {
   const handleLogIn = async () => {
     const { user } = await signInWithEmailAndPassword(auth, email, password)
     // console.log(JSON.stringify(user, null, 2))
-    navigation.navigate('HomeScreen');// Cycle sorunu yok
+    navigation.navigate('HomeScreen');
   }
 
-
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      console.log('auth state')
+      if (user) {
+        // setUserID(user.uid)
+        console.log('user var')
+  
+        navigation.navigate('HomeScreen')
+  
+        console.log("giriş yapılmış")
+      } else {
+        console.log('user yok')
+        // navigation.navigate('LogIn')
+      }
+    });
+  
+  
+  }, [])
 
   return (
     <SafeAreaProvider style={styles.container}>
