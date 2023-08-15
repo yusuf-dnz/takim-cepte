@@ -1,66 +1,108 @@
-import { View, Text, ScrollView, ImageBackground, Dimensions } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { Avatar, Card, Divider, IconButton, List } from 'react-native-paper';
-import StaticTopBar from '../components/StaticTopBar';
-import { useNavigation } from '@react-navigation/native';
-import ChatScreen from './chat_screen';
-import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import {
+  View,
+  Text,
+  ScrollView,
+  ImageBackground,
+  Dimensions,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Avatar, Card, Divider, IconButton, List } from "react-native-paper";
+import StaticTopBar from "../components/StaticTopBar";
+import { useNavigation } from "@react-navigation/native";
+import ChatScreen from "./chat_screen";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+import { auth, db } from "../firebase";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function ChatList({ navigation }) {
+  const currentUserID = auth.currentUser.uid;
+  const [chats, setChats] = useState([]);
 
-  const [chatList, setChatList] = useState([]);
+  // const [targetUserID, setTargetUserID] = useState("");
+
+  // useEffect(() => {}, []);
+
+ const [targetUserData, setTargetUserData] = useState([]);
+
+  // const getTargetUserData = async () => {
+  //   const docRef = doc(db, "users", targetUserID);
+  //   const docSnap = await getDoc(docRef);
+  //   setTargetUserData(docSnap.data());
+  // };
 
   useEffect(() => {
+    const docRef = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", currentUserID)
+    );
+    onSnapshot(docRef, (querySnapshot) => {
+      const queryDatas = querySnapshot.docs.map((doc) => {
+        const targetUser = doc
+          .data()
+          .participants.find((x) => x !== currentUserID);
 
-    const ChatLister = async () => {
-     
-      const q = query(collection(db, "chats"), where("participants", "array-contains-any", [auth.currentUser.uid ]));
-      const array = [];
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const id = doc.id; 
-        const dataWithId = { id, ...doc.data() };
-        array.push(dataWithId)
+        console.log(targetUser);
+
+        // setTargetUserID(targetUser);
+        getTargetUserData(targetUser);
+        console.log("veri1")
       });
-      setChatList(array);
-    }
 
-    ChatLister();
-  }, [])
+      setChats(querySnapshot.docs);
+    });
+    console.log("Mesajlar güncellendi");
+  }, []);
 
+  const getTargetUserData = async (x) => {
+    // console.log("hello",targetUserID)
+    const docRef = doc(db, "users", x);
+    const docSnap = await getDoc(docRef);
+    const stateData = targetUserData;
+    stateData.push(docSnap.data())
+    setTargetUserData(stateData)
+  };
+  console.log(targetUserData)
 
   return (
-    <View style={{}}>
+    <SafeAreaView>
+      <View>
+        <StaticTopBar text={"CHATS"} />
 
-      <StaticTopBar text={"CHATS"} />
-
-      <ScrollView>
-
-        <View style={{ flex: 1, marginHorizontal: 10 }}>
-          {chatList.map((chat, index) => (
-            <React.Fragment key={index}>
-              <List.Item
-                title={chat.participants[1]}
-                description={chat.id}
-                left={() => (
-                  <Avatar.Text
-                    label="UN"
-                    size={56}
-                  />
-                )}
-                onPress={() => navigation.navigate("ChatScreen", {chatId: chat.id })}
-              />
-              <Divider />
-            </React.Fragment>
-
-          ))}
-
-        </View>
-      </ScrollView>
-
-
-    </View >
-
-  )
+        <ScrollView>
+          <View style={{ flex: 1, marginHorizontal: 10 }}>
+            {chats.map((chat, index) => (
+              <React.Fragment key={index}>
+                <List.Item
+                  title={chat
+                    .data()
+                    .participants.find((x) => x !== currentUserID)}
+                  description={
+                    (chat.data().messages ?? [])[0]?.text ?? undefined
+                  }
+                  left={() => (
+                    <Avatar.Image
+                      size={56}
+                      source={{ uri: "https://picsum.photos/200/300" }}
+                    />
+                  )}
+                  onPress={() =>
+                    navigation.navigate("ChatScreen", { chatId: chat.id })
+                  }
+                />
+                <Divider />
+              </React.Fragment>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 }

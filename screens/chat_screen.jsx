@@ -49,7 +49,7 @@ export default function ChatScreen() {
 
   };
 
-  console.log(messages)
+  
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>

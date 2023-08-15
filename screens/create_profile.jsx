@@ -2,7 +2,7 @@ import { View, Text, Dimensions, StyleSheet, Image, ScrollView, TextInput, Butto
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react'
 import StaticTopBar from '../components/StaticTopBar';
-import DatePicker from '@dietime/react-native-date-picker';
+// import DatePicker from '@dietime/react-native-date-picker';
 import { auth, db, storage } from '../firebase';
 import { Timestamp, addDoc, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
@@ -59,13 +59,11 @@ export default function CreateProfile({ navigation }) {
 
     }
 
-    // const addProfilePicture = async () => {
-
-    // }
+   
 
     console.log(auth.currentUser.uid)
     const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
+
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
@@ -82,12 +80,8 @@ export default function CreateProfile({ navigation }) {
 
                 const url = await getDownloadURL(storageRef)
                 setStorageImageURL(url)
-                console.log(storageImageURL)
-
 
             })
-            console.log(image)
-            console.log(result.assets[0].uri)
 
         }
     };
@@ -159,13 +153,13 @@ export default function CreateProfile({ navigation }) {
                                     <Text style={styles.datePickerTexts}>Year</Text>
 
                                 </View>
-                                <DatePicker
+                                {/* <DatePicker
                                     width={300}
                                     value={bornDate}
                                     onChange={(value) => setBornDate(value)}
                                     format="dd-mm-yyyy"
                                     startYear={1950}
-                                />
+                                /> */}
 
 
                                 <Pressable

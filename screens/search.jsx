@@ -1,31 +1,47 @@
-import { View, Text, ScrollView, ImageBackground, Dimensions, Button } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { Avatar, Card, IconButton, List } from 'react-native-paper';
-import { auth, db, eventLister } from '../firebase';
-import StaticTopBar from '../components/StaticTopBar';
-import { getFirestore, doc, setDoc, getDocs, collection, getDoc, addDoc } from "firebase/firestore";
+import {
+  View,
+  Text,
+  ScrollView,
+  ImageBackground,
+  Dimensions,
+  Button,
+  Image,
+  ImageComponent,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Avatar, Card, Divider, IconButton, List } from "react-native-paper";
+import { auth, db, eventLister } from "../firebase";
+import StaticTopBar from "../components/StaticTopBar";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDocs,
+  collection,
+  getDoc,
+  addDoc,
+  query,
+  where,
+  or,
+} from "firebase/firestore";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-
-
-export default function Search() {
-
-
+export default function Search({ navigation }) {
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
 
+  const currentUserID = auth.currentUser.uid;
 
   useEffect(() => {
     var eventArray = [];
     const eventLister = async () => {
       const querySnapshot = await getDocs(collection(db, "events"));
       querySnapshot.forEach((doc) => {
-        eventArray.push(
-          doc.id
-        );
+        eventArray.push(doc.data());
       });
-      setEvents(eventArray)
-    }
-
+      setEvents(eventArray);
+      // console.log(events)
+    };
 
     eventLister();
   }, []);
@@ -35,72 +51,122 @@ export default function Search() {
     const userLister = async () => {
       const querySnapshot = await getDocs(collection(db, "users"));
       querySnapshot.forEach((doc) => {
-        userArray.push(doc.data())
-        // console.log(doc.data())
-
+        userArray.push(doc.data());
       });
+
       setUsers([...userArray]);
-    }
+    };
 
     userLister();
-    console.log(users)
   }, []);
 
   const createChat = async (targetID) => {
-    const docRef = await addDoc(collection(db, "chats"), {
-      participants: [auth.currentUser.uid, targetID],
-    });
+    const docRef = query(
+      collection(db, "chats"),
+      or(
+        where("participants", "==", [targetID, currentUserID]),
+        where("participants", "==", [currentUserID, targetID])
+      )
+    );
+    const querySnapshot = await getDocs(docRef);
+    // console.log(querySnapshot.empty)
+    if (querySnapshot.empty) 
+    { 
+      const create = await addDoc(collection(db, "chats"), {
+        participants: [currentUserID, targetID],
+      });
+      // console.log(create.id)
+      console.log("chat oluşturuldu");
+      navigation.navigate("ChatScreen", { chatId: create.id });
 
-  }
+
+    } 
+    else 
+    {
+      console.log(querySnapshot.docs[0].id);
+      navigation.navigate("ChatScreen", { chatId: querySnapshot.docs[0].id });
+    }
+  };
 
   return (
-    <View >
-      <StaticTopBar text={"TOPLULUK"} />
-      <ScrollView>
-        <View style={{ flex: 1,marginBottom:100}}>
+    <View>
+      <SafeAreaView>
+        <StaticTopBar text={"COMMUNITY"} />
+        <ScrollView>
+          <View style={{ flex: 1, marginBottom: 100 }}>
+            <View>
+              {events.map((event, index) => (
+                <React.Fragment key={index}>
+                  <View
+                    style={{
+                      marginVertical: 5,
+                      marginHorizontal: 5,
+                      borderRadius: 20,
+                      backgroundColor: "blue",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        zIndex: 1,
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: 20,
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        marginBottom: -27,
+                        borderTopLeftRadius: 10,
+                        borderTopRightRadius: 10,
+                        paddingLeft: 10,
+                      }}
+                    >
+                      {event.eventTitle}{" "}
+                    </Text>
 
-          <View>
-            {events.map((event, index) => (
-
-              <Card.Title
-                key={index}
-                style={{ margin: 10, borderRadius: 10, backgroundColor: 'rgba(64, 108, 175, 0.4)', }}
-                title={event}
-                titleStyle={{ color: 'white', fontWeight: 'bold', fontSize: 22, }}
-                left={(props) => <Avatar.Icon {...props} icon="earth" />}
-              />
-            ))}
-
-          </View>
-
-          <View>
-            {users.map((user,index) => (
-              <React.Fragment
-                  key={index}>
-                    
-                <List.Item
-                  key={index}
-                  title={user.userId}
-                  description="hi"
-                  left={() => (
-                    <Avatar.Text
-                      label="UN"
-                      size={56}
+                    <Card.Cover
+                      source={{ uri: event.eventImageURL }}
+                      style={{
+                        height: "100%",
+                        height: 160,
+                        overflow: "hidden",
+                        backgroundColor: "transparent",
+                        borderRadius: 10,
+                      }}
                     />
-                  )}
-                  right={() => (
-                    <Button title='+' onPress={() => createChat(user.userId)} />
-                  )}
-                />
-            </React.Fragment>
-
-            ))}
-
+                  </View>
+                </React.Fragment>
+              ))}
+            </View>
+            <View>
+              {users.map((user, index) => (
+                <React.Fragment key={index}>
+                  <List.Item
+                    style={{ paddingHorizontal: 10 }}
+                    title={user.displayName}
+                    description={user.userDescription}
+                    left={() => (
+                      <Avatar.Image
+                        size={64}
+                        style={{}}
+                        source={{ uri: user.storageProfileImageURL }}
+                      />
+                    )}
+                    onPress={() =>
+                      navigation.navigate("VisitProfile", {
+                        targetUserData: user,
+                      })
+                    }
+                    right={() => (
+                      <Button
+                        title=" + "
+                        onPress={() => createChat(user.userId)}
+                      />
+                    )}
+                  />
+                </React.Fragment>
+              ))}
+            </View>
           </View>
-
-        </View>
-      </ScrollView>
-
+        </ScrollView>
+      </SafeAreaView>
     </View>
-  )
+  );
 }

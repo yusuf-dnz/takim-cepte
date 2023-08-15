@@ -4,8 +4,8 @@ import { Divider } from 'react-native-paper'
 
 export default function StaticTopBar({text}) {
     return (
-        <View style={{ height: 50, backgroundColor: 'white', alignItems: 'center', }}>
-            <Text style={{color:'black',paddingTop:20,fontSize:18,}}>{text}</Text>
+        <View style={{ height: 25, backgroundColor: '#ffffff30', alignItems: 'center', }}>
+            <Text style={{color:'black',paddingTop:0,fontSize:18,}}>{text}</Text>
       
 
         </View>

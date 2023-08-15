@@ -7,24 +7,11 @@ import { StyleSheet, Button } from 'react-native';
 import { getFirestore, doc, setDoc, getDocs, collection, getDoc } from "firebase/firestore";
 import { signOut } from 'firebase/auth';
 import { getDownloadURL, ref } from 'firebase/storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile({ navigation }) {
     const userID = auth.currentUser.uid;
-    // const pictureLocation = 'UserAvatars/' + userID + '/pp.png'
-    // console.log(pictureLocation)
-
-    useEffect(() => {
-        // console.log("avatar")
-        // getDownloadURL(ref(storage, 'UserAvatars/' + userID + '/pp.png'))
-        //     .then(url => {
-        //         setUserPictureUrl(url);
-        //     })
-        //     .catch(error => {
-
-        //         console.error('Dosya çekilirken hata oluştu: ', error);
-        //     });
-
-    }, [])
+  
 
     const handleLogOut = async e => {
         await signOut(auth)
@@ -53,12 +40,14 @@ export default function Profile({ navigation }) {
 
     }, [])
 
-    console.log(userProfileData)
+    // console.log(userProfileData)
 
     return (
+        <SafeAreaView>
+
         <View>
             
-            <StaticTopBar text={"PROFİL"} />
+            <StaticTopBar text={"PROFILE"} />
 
             <ScrollView
                 style={{ marginBottom: 50 }}
@@ -86,6 +75,7 @@ export default function Profile({ navigation }) {
             </ScrollView>
 
         </View>
+        </SafeAreaView>
     )
 }
 const styles = StyleSheet.create({
