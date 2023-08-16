@@ -7,10 +7,12 @@ import {
   Button,
   Image,
   ImageComponent,
+  StyleSheet,
+  RefreshControl,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Avatar, Card, Divider, IconButton, List } from "react-native-paper";
-import { auth, db, eventLister } from "../firebase";
+import { auth, db } from "../firebase";
 import StaticTopBar from "../components/StaticTopBar";
 import {
   getFirestore,
@@ -27,6 +29,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Search({ navigation }) {
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -70,19 +81,14 @@ export default function Search({ navigation }) {
     );
     const querySnapshot = await getDocs(docRef);
     // console.log(querySnapshot.empty)
-    if (querySnapshot.empty) 
-    { 
+    if (querySnapshot.empty) {
       const create = await addDoc(collection(db, "chats"), {
         participants: [currentUserID, targetID],
       });
       // console.log(create.id)
       console.log("chat oluşturuldu");
       navigation.navigate("ChatScreen", { chatId: create.id });
-
-
-    } 
-    else 
-    {
+    } else {
       console.log(querySnapshot.docs[0].id);
       navigation.navigate("ChatScreen", { chatId: querySnapshot.docs[0].id });
     }
@@ -92,7 +98,12 @@ export default function Search({ navigation }) {
     <View>
       <SafeAreaView>
         <StaticTopBar text={"COMMUNITY"} />
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{}}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <View style={{ flex: 1, marginBottom: 100 }}>
             <View>
               {events.map((event, index) => (
@@ -170,3 +181,15 @@ export default function Search({ navigation }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: 'pink',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
