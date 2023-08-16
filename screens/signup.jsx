@@ -43,7 +43,7 @@ export default function SignUp({ navigation }) {
         userId: user.uid,
         // createdDate: Timestamp.fromDate(new Date()),
       });
-      console.log(JSON.stringify(user, null, 2))
+      // console.log(JSON.stringify(user, null, 2))
 
       onAuthStateChanged(auth, (user) => {
         console.log('auth state')

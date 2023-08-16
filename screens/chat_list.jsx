@@ -25,51 +25,69 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 export default function ChatList({ navigation }) {
   const currentUserID = auth.currentUser.uid;
   const [chats, setChats] = useState([]);
+  const [onSnap, setOnSnap] = useState([]);
 
-  // const [targetUserID, setTargetUserID] = useState("");
-
-  // useEffect(() => {}, []);
-
- const [targetUserData, setTargetUserData] = useState([]);
-
-  // const getTargetUserData = async () => {
-  //   const docRef = doc(db, "users", targetUserID);
-  //   const docSnap = await getDoc(docRef);
-  //   setTargetUserData(docSnap.data());
-  // };
 
   useEffect(() => {
     const docRef = query(
       collection(db, "chats"),
       where("participants", "array-contains", currentUserID)
     );
-    onSnapshot(docRef, (querySnapshot) => {
-      const queryDatas = querySnapshot.docs.map((doc) => {
-        const targetUser = doc
-          .data()
-          .participants.find((x) => x !== currentUserID);
+    const unsub = onSnapshot(docRef, (querySnapshot) => {
+      console.log("ONSNAP ÇALIŞTI");
+      setOnSnap(querySnapshot.docs);
+      setChats([]);
 
-        console.log(targetUser);
-
-        // setTargetUserID(targetUser);
-        getTargetUserData(targetUser);
-        console.log("veri1")
-      });
-
-      setChats(querySnapshot.docs);
     });
-    console.log("Mesajlar güncellendi");
+    return () => {
+      unsub();
+    };
   }, []);
 
-  const getTargetUserData = async (x) => {
-    // console.log("hello",targetUserID)
-    const docRef = doc(db, "users", x);
+
+
+
+
+  useEffect(() => {
+    // setChats([])
+    onSnap.map((doc) => {
+      let targetUser;
+      const chatData = doc;
+      const chatUsers = doc.data().participants;
+      if (chatUsers[0] == currentUserID) {
+        targetUser = chatUsers[1];
+      } else targetUser = chatUsers[0];
+
+      createTargetChats(chatData,targetUser);
+
+    });
+  }, [onSnap]);
+
+  const createTargetChats = async (x,y) => {
+    // console.log(chatsArray)
+
+    const docRef = doc(db, "users", y);
     const docSnap = await getDoc(docRef);
-    const stateData = targetUserData;
-    stateData.push(docSnap.data())
-    setTargetUserData(stateData)
+    if (docSnap.exists()) {
+      // console.log(x.messages)
+      // console.log("Y",JSON.stringify(docSnap.data(),null,2))
+
+
+    const  newItem = {
+          chatID :  x.id,
+          messages : x.data().messages,
+          targetUserName : docSnap.data().displayName,
+          targetUserImage : docSnap.data().storageProfileImageURL
+        };
+
+        setChats(prevChats => [...prevChats, newItem]);
+
+    } else {
+      console.log("No getTargetUser such document!");
+    }
   };
-  console.log(targetUserData)
+
+
 
   return (
     <SafeAreaView>
@@ -81,20 +99,18 @@ export default function ChatList({ navigation }) {
             {chats.map((chat, index) => (
               <React.Fragment key={index}>
                 <List.Item
-                  title={chat
-                    .data()
-                    .participants.find((x) => x !== currentUserID)}
+                  title={chat.targetUserName}
                   description={
-                    (chat.data().messages ?? [])[0]?.text ?? undefined
+                    (chat.messages ?? [])[0]?.text ?? undefined
                   }
                   left={() => (
                     <Avatar.Image
                       size={56}
-                      source={{ uri: "https://picsum.photos/200/300" }}
+                      source={{ uri:  chat.targetUserImage}}
                     />
                   )}
                   onPress={() =>
-                    navigation.navigate("ChatScreen", { chatId: chat.id })
+                    navigation.navigate("ChatScreen", { chatId: chat.chatID })
                   }
                 />
                 <Divider />
