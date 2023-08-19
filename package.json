@@ -9,7 +9,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@dietime/react-native-date-picker": "^1.2.0",
     "@expo/webpack-config": "^18.0.1",
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/core": "^6.4.9",
@@ -33,7 +32,10 @@
     "react-native-screens": "~3.20.0",
     "react-native-vector-icons": "^10.0.0",
     "react-native-web": "~0.18.10",
-    "redux": "^4.2.1"
+    "redux": "^4.2.1",
+    "expo-system-ui": "~2.2.1",
+    "@react-native-community/datetimepicker": "6.7.3",
+    "expo-font": "~11.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -1,41 +1,47 @@
-import { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { TextInput, Avatar, Button } from 'react-native-paper';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { auth, db } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import { Timestamp } from 'firebase/firestore';
-
+import { useState } from "react";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { TextInput, Avatar, Button } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { auth, db } from "../firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 
 // import { NativeBaseProvider, Box } from "native-base";
 
-
-
 export default function SignUp({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rePassword, setRepeatPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rePassword, setRepeatPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [passwordMatch,setPasswordMatch] = useState(true);
+  const [displayName, setDisplayName] = useState("");
+  const [passwordMatch, setPasswordMatch] = useState(true);
+  const [passwordIcon, setPasswordIcon] = useState("eye");
 
   const togglePasswordVisibility = () => {
+    if (!showPassword) setPasswordIcon("eye-off");
+    else setPasswordIcon("eye");
     setShowPassword(!showPassword);
-  }
+  };
 
   const handleSignUp = async () => {
-
     if (password != rePassword) {
-      console.log("şifre eşleşmedi kontrol et");//toast message ekle
-      setPasswordMatch(false)
-    }
-    else {
-      console.log("şifre eşleşti");//toast message ekle
+      console.log("şifre eşleşmedi kontrol et"); //toast message ekle
+      setPasswordMatch(false);
+    } else {
+      console.log("şifre eşleşti"); //toast message ekle
 
-      setPasswordMatch(true)
-      const { user } = await createUserWithEmailAndPassword(auth, email, password)
+      setPasswordMatch(true);
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       await setDoc(doc(db, "users", user.uid), {
         email: email,
         password: password,
@@ -46,111 +52,121 @@ export default function SignUp({ navigation }) {
       // console.log(JSON.stringify(user, null, 2))
 
       onAuthStateChanged(auth, (user) => {
-        console.log('auth state')
+        console.log("auth state");
         if (user) {
           // setUserID(user.uid)
-          console.log('user var')
-    
-          navigation.navigate('CreateProfile')
-    
-          console.log("giriş yapılmış")
+          console.log("user var");
+
+          navigation.navigate("CreateProfile");
+
+          console.log("giriş yapılmış");
         } else {
-          console.log('user kayıt sorunu')
+          console.log("user kayıt sorunu");
         }
       });
-      
-
     }
-    return
-  }
-
-
+    return;
+  };
 
   return (
-    <SafeAreaProvider style={styles.container}>
+    <View style={styles.container}>
+      <SafeAreaProvider>
+        <View style={styles.view}>
+          <TextInput
+            style={styles.input}
+            textColor="#eeeeee"
+            activeUnderlineColor="white"
+            underlineColor="white"
+            label={<Text style={{ color: "#eeeeee" }}>Display Name</Text>}
+            value={displayName}
+            onChangeText={(text) => setDisplayName(text)}
+          />
+          <TextInput
+            style={styles.input}
+            label={<Text style={{ color: "#eeeeee" }}>Email</Text>}
+            value={email}
+            textColor="#eeeeee"
+            underlineColor="white"
+            activeUnderlineColor="white"
+            onChangeText={(text) => setEmail(text)}
+          />
 
+          <TextInput
+            style={styles.input}
+            textColor="#eeeeee"
+            activeUnderlineColor="white"
+            underlineColor="white"
+            label={<Text style={{ color: "#eeeeee" }}>Password</Text>}
+            secureTextEntry={!showPassword}
+            onChangeText={(text) => setPassword(text)}
+            value={password}
+          />
 
-      <View style={styles.view}>
-        <TextInput style={styles.input}
-          label="Display Name"
-          value={displayName}
-          onChangeText={(text) => setDisplayName(text)}
-        />
-        <TextInput style={styles.input}
-          label="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
+          <TextInput
+            style={styles.input}
+            textColor="#eeeeee"
+            activeUnderlineColor="white"
+            underlineColor="white"
+            label={
+              <Text style={{ color: "#eeeeee" }}>Repeat the password</Text>
+            }
+            value={rePassword}
+            onChangeText={(text) => setRepeatPassword(text)}
+            secureTextEntry={!showPassword}
+            error={!passwordMatch}
+            right={
+              <TextInput.Icon
+                id="password-icon"
+                icon={passwordIcon}
+                color="white"
+                onPress={togglePasswordVisibility}
+              />
+            }
+          />
 
-        <TextInput style={styles.input}
-          label="Password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          secureTextEntry={!showPassword}
-        />
+          <Button
+            style={{
+              marginTop: 20,
+              backgroundColor: "#0000ff44",
+              borderRadius: 5,
+            }}
+            mode="contained-tonal"
+            onPress={() => {
+              handleSignUp();
+            }}
+          >
+            <Text style={{ color: "white" }}>Kayıt Ol</Text>
+          </Button>
 
-        <TextInput style={styles.input}
-          label="Repeat the password"
-          value={rePassword}
-          onChangeText={(text) => setRepeatPassword(text)}
-          secureTextEntry={!showPassword}
-          error={!passwordMatch}
-        />
-
-        {/*göz butonu */}
-        <Button style={{ width: 10, marginTop: 10, }} icon="eye" col mode="text" onPress={togglePasswordVisibility} />
-
-
-
-
-        <Button
-          buttonColor='#be75359f'
-          textColor='white'
-          style={{
-            marginTop: 20,
-          }}
-          mode="contained-tonal"
-          onPress={() => {
-            handleSignUp();
-
-          }}>
-          Sign Up
-        </Button>
-
-        <Button
-          style={{
-            marginTop: 10,
-            alignItems: 'flex-end',
-          }}
-          onPress={() => navigation.navigate('LogIn')}>
-          Log In
-        </Button>
-
-      </View>
-    </SafeAreaProvider>
-
-  )
+          <Button
+            rippleColor="#0000ff44"
+            style={{
+              marginTop: 10,
+              alignItems: "flex-end",
+            }}
+            onPress={() => navigation.navigate("LogIn")}
+          >
+            <Text style={{ color: "white" }}>Giriş Yap</Text>
+          </Button>
+        </View>
+      </SafeAreaProvider>
+    </View>
+  );
 }
 
-const styles = StyleSheet.create(
-  {
-    container: {
-      flex: 1,
-      backgroundColor: 'white',
-      paddingHorizontal: 20,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#282A3A",
+    paddingHorizontal: 20,
+  },
 
-    },
+  view: {
+    marginTop: '50%',
+  },
 
-    view: {
-      paddingTop: 150,
-      backgroundColor: 'white',
-    },
-
-    input: {
-      marginTop: 20,
-      border: 0,
-      backgroundColor: 'white',
-    },
-
-  }
-)
+  input: {
+    backgroundColor: "transparent",
+    marginVertical:10,
+  },
+});

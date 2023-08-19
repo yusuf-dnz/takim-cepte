@@ -1,8 +1,10 @@
-*{
-    color: rgb(255, 0, 0);
-}
+html {
+    font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #141823;
+  }
 
-.as{
-    background-color: rgba(0, 0, 0, 0.522);
-
-}
+  profileDisplayName{
+    color: antiquewhite;
+    font-family: cursive;
+  }

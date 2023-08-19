@@ -27,7 +27,6 @@ export default function ChatList({ navigation }) {
   const [chats, setChats] = useState([]);
   const [onSnap, setOnSnap] = useState([]);
 
-
   useEffect(() => {
     const docRef = query(
       collection(db, "chats"),
@@ -35,9 +34,9 @@ export default function ChatList({ navigation }) {
     );
     const unsub = onSnapshot(docRef, (querySnapshot) => {
       console.log("ONSNAP ÇALIŞTI");
-      setOnSnap(querySnapshot.docs);
       setChats([]);
 
+      setOnSnap(querySnapshot.docs);
     });
     return () => {
       unsub();
@@ -45,11 +44,8 @@ export default function ChatList({ navigation }) {
   }, []);
 
 
-
-
-
   useEffect(() => {
-    // setChats([])
+    setChats([])
     onSnap.map((doc) => {
       let targetUser;
       const chatData = doc;
@@ -58,12 +54,11 @@ export default function ChatList({ navigation }) {
         targetUser = chatUsers[1];
       } else targetUser = chatUsers[0];
 
-      createTargetChats(chatData,targetUser);
-
+      createTargetChats(chatData, targetUser);
     });
   }, [onSnap]);
 
-  const createTargetChats = async (x,y) => {
+  const createTargetChats = async (x, y) => {
     // console.log(chatsArray)
 
     const docRef = doc(db, "users", y);
@@ -72,53 +67,49 @@ export default function ChatList({ navigation }) {
       // console.log(x.messages)
       // console.log("Y",JSON.stringify(docSnap.data(),null,2))
 
+      const newItem = {
+        chatID: x.id,
+        messages: x.data().messages,
+        targetUserName: docSnap.data().displayName,
+        targetUserImage: docSnap.data().storageProfileImageURL,
+      };
 
-    const  newItem = {
-          chatID :  x.id,
-          messages : x.data().messages,
-          targetUserName : docSnap.data().displayName,
-          targetUserImage : docSnap.data().storageProfileImageURL
-        };
-
-        setChats(prevChats => [...prevChats, newItem]);
-
+      setChats((prevChats) => [...prevChats, newItem]);
     } else {
       console.log("No getTargetUser such document!");
     }
   };
 
-
-
   return (
-    <SafeAreaView>
-      <View>
-        <StaticTopBar text={"CHATS"} />
+    <View style={{backgroundColor:'#282A3A'}}>
+      <SafeAreaView style={{backgroundColor:'#282A3A',minHeight:'100%'}}>
+          <StaticTopBar text={"CHATS"} />
 
-        <ScrollView>
-          <View style={{ flex: 1, marginHorizontal: 10 }}>
-            {chats.map((chat, index) => (
-              <React.Fragment key={index}>
-                <List.Item
-                  title={chat.targetUserName}
-                  description={
-                    (chat.messages ?? [])[0]?.text ?? undefined
-                  }
-                  left={() => (
-                    <Avatar.Image
-                      size={56}
-                      source={{ uri:  chat.targetUserImage}}
-                    />
-                  )}
-                  onPress={() =>
-                    navigation.navigate("ChatScreen", { chatId: chat.chatID })
-                  }
-                />
-                <Divider />
-              </React.Fragment>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+          <ScrollView>
+            <View style={{ flex: 1, marginHorizontal: 10 }}>
+              {chats.map((chat, index) => (
+                <React.Fragment key={index}>
+                  <List.Item
+                    title={chat.targetUserName}
+                    titleStyle={{color:'#EEEEEE'}}
+                    description={(chat.messages ?? [])[0]?.text ?? undefined}
+                    descriptionStyle={{color:'#EEEEEE'}}
+                    left={() => (
+                      <Avatar.Image
+                        size={56}
+                        source={{ uri: chat.targetUserImage }}
+                      />
+                    )}
+                    onPress={() =>
+                      navigation.navigate("ChatScreen", { chatId: chat.chatID })
+                    }
+                  />
+                  <Divider />
+                </React.Fragment>
+              ))}
+            </View>
+          </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }

@@ -4,14 +4,14 @@ import {
   ScrollView,
   ImageBackground,
   Dimensions,
-  Button,
+  
   Image,
   ImageComponent,
   StyleSheet,
   RefreshControl,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Avatar, Card, Divider, IconButton, List } from "react-native-paper";
+import { Avatar, Card, Divider, IconButton, List ,Button, } from "react-native-paper";
 import { auth, db } from "../firebase";
 import StaticTopBar from "../components/StaticTopBar";
 import {
@@ -46,20 +46,22 @@ export default function Search({ navigation }) {
   useEffect(() => {
     var eventArray = [];
     const eventLister = async () => {
+      console.log("event yenilendi")
       const querySnapshot = await getDocs(collection(db, "events"));
       querySnapshot.forEach((doc) => {
         eventArray.push(doc.data());
       });
       setEvents(eventArray);
-      // console.log(events)
     };
 
     eventLister();
-  }, []);
+  }, [refreshing]);
 
   useEffect(() => {
     var userArray = [];
     const userLister = async () => {
+      console.log("users yenilendi")
+
       const querySnapshot = await getDocs(collection(db, "users"));
       querySnapshot.forEach((doc) => {
         userArray.push(doc.data());
@@ -69,37 +71,16 @@ export default function Search({ navigation }) {
     };
 
     userLister();
-  }, []);
+  }, [refreshing]);
 
-  const createChat = async (targetID) => {
-    const docRef = query(
-      collection(db, "chats"),
-      or(
-        where("participants", "==", [targetID, currentUserID]),
-        where("participants", "==", [currentUserID, targetID])
-      )
-    );
-    const querySnapshot = await getDocs(docRef);
-    // console.log(querySnapshot.empty)
-    if (querySnapshot.empty) {
-      const create = await addDoc(collection(db, "chats"), {
-        participants: [currentUserID, targetID],
-      });
-      // console.log(create.id)
-      console.log("chat oluşturuldu");
-      navigation.navigate("ChatScreen", { chatId: create.id });
-    } else {
-      console.log(querySnapshot.docs[0].id);
-      navigation.navigate("ChatScreen", { chatId: querySnapshot.docs[0].id });
-    }
-  };
+ 
 
   return (
-    <View>
+    <View style={{backgroundColor:'#282A3A'}}>
       <SafeAreaView>
         <StaticTopBar text={"COMMUNITY"} />
         <ScrollView
-          contentContainerStyle={{}}
+          style={{height:'100%'}}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -110,20 +91,28 @@ export default function Search({ navigation }) {
                 <React.Fragment key={index}>
                   <View
                     style={{
-                      marginVertical: 5,
-                      marginHorizontal: 5,
+                      marginVertical: 7,
+                      marginHorizontal: 16,
                       borderRadius: 20,
-                      backgroundColor: "blue",
+                      backgroundColor:'blue',
+                      shadowColor: "blue", 
+                      shadowOffset: {
+                        width: 2,
+                        height: 2,
+                      }, 
+                      shadowOpacity: 0.25, 
+                      shadowRadius: 3.84, 
+                      elevation: 5, 
                     }}
                   >
                     <Text
                       style={{
                         zIndex: 1,
-                        color: "white",
+                        color: "#eeeeee",
                         fontWeight: "bold",
                         fontSize: 20,
                         backgroundColor: "rgba(0, 0, 0, 0.6)",
-                        marginBottom: -27,
+                        marginBottom: -25,
                         borderTopLeftRadius: 10,
                         borderTopRightRadius: 10,
                         paddingLeft: 10,
@@ -152,7 +141,9 @@ export default function Search({ navigation }) {
                   <List.Item
                     style={{ paddingHorizontal: 10 }}
                     title={user.displayName}
+                    titleStyle={{color:'#eeeeee'}}
                     description={user.userDescription}
+                    descriptionStyle={{color:'#eeeeee'}}
                     left={() => (
                       <Avatar.Image
                         size={64}
@@ -165,12 +156,7 @@ export default function Search({ navigation }) {
                         targetUserData: user,
                       })
                     }
-                    right={() => (
-                      <Button
-                        title=" + "
-                        onPress={() => createChat(user.userId)}
-                      />
-                    )}
+                    
                   />
                 </React.Fragment>
               ))}
