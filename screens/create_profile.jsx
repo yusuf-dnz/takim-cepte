@@ -20,8 +20,10 @@ import { Timestamp, addDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { SegmentedButtons } from "react-native-paper";
+
+
+console.log("CREATE PROFILE")
 
 export const uriToBlob = (uri) => {
   return new Promise((resolve, reject) => {
@@ -48,6 +50,7 @@ export default function CreateProfile({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);//Modal içeriği
   const [gender, setGender] = React.useState("other");
+  const userID = auth.currentUser.uid;
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -89,12 +92,13 @@ export default function CreateProfile({ navigation }) {
       userDescription: description,
       bornDate: Timestamp.fromDate(date),
       storageProfileImageURL: storageImageURL,
+      profileDetailsCreated: true,
     });
 
     navigation.navigate("HomeScreen");
   };
 
-  console.log(auth.currentUser.uid);
+  // console.log(auth.currentUser.uid);
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -108,7 +112,7 @@ export default function CreateProfile({ navigation }) {
 
       const storageRef = ref(
         storage,
-        `UserAvatars/${auth.currentUser.uid}/pp.jpg`
+        `UserAvatars/${userID}/pp.jpg`
       );
       const blobFile = await uriToBlob(result.assets[0].uri);
       await uploadBytes(storageRef, blobFile).then(async (snapshot) => {
@@ -146,6 +150,7 @@ export default function CreateProfile({ navigation }) {
               backgroundColor: "#001C30",
               borderBottomColor: "#000000",
               minHeight: 150,
+              borderRadius:5
             }}
           >
             <TextInput
@@ -161,13 +166,14 @@ export default function CreateProfile({ navigation }) {
           </View>
 
           <Pressable
-            style={{ marginTop: 5, padding: 10, backgroundColor: "#001C30" }}
+            style={{ marginTop: 5, padding: 10, backgroundColor: "#001C30",borderRadius:5 }}
             onPress={() => showDatepicker()}
           >
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
+                
               }}
             >
               <Text style={{ color: "#eeeeee66", fontSize: 20 }}>
@@ -194,6 +200,8 @@ export default function CreateProfile({ navigation }) {
               marginTop: 5,
               backgroundColor: "#001C30",
               height: 40,
+              borderRadius:5,
+
             }}
           >
             <Pressable onPress={() => regionModal()}>
@@ -299,8 +307,9 @@ const styles = StyleSheet.create({
     color: "#eeeeeeaa",
   },
   container: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").width, // Eğer dörtgen bir avatar isteniyorsa bu kısmı özelleştirebilirsiniz.
+    borderRadius:5,
+    width: '100%',
+    height: Dimensions.get("window").width-20, // Eğer dörtgen bir avatar isteniyorsa bu kısmı özelleştirebilirsiniz.
     overflow: "hidden",
     backgroundColor: "#00000095",
   },

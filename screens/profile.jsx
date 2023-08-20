@@ -35,6 +35,7 @@ export default function Profile({ navigation }) {
   const [userProfileData, setUserProfileData] = useState({});
   useEffect(() => {
     const getUserProfile = async () => {
+      console.log("PROFILE JS getUserProfile ");
       const docRef = doc(db, "users", userID);
       const docSnap = await getDoc(docRef);
 
@@ -50,70 +51,62 @@ export default function Profile({ navigation }) {
     getUserProfile();
   }, []);
 
-  // console.log(userProfileData)
-
   return (
     <View style={{ backgroundColor: "#282A3A" }}>
-      <SafeAreaView style={{ backgroundColor: "#282A3A", minHeight: "100%" }}>
-        <View>
-          <StaticTopBar text={"PROFILE"} />
+      <SafeAreaView style={{ minHeight: "100%" }}>
+        <StaticTopBar text={"Profil"} />
 
-          <ScrollView style={{ marginBottom: 50, padding: 5 }}>
-            {/* <Avatar.Image size={Dimensions.get('window').width} style={{borderRadius:0,backgroundColor:'transparent'}} source={require('../assets/ism.png') } /> */}
-            <View style={styles.container}>
-              <Image
-                source={{ uri: userProfileData.storageProfileImageURL }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            </View>
+        <ScrollView style={{ marginBottom: 50, padding: 5 }}>
+          <View style={styles.container}>
+            <Image
+              source={{ uri: userProfileData.storageProfileImageURL }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </View>
 
-            <Text style={styles.displayNameText}>
-              {userProfileData.displayName}
+          <Text style={styles.displayNameText}>
+            {userProfileData.displayName}
+          </Text>
+
+          <View style={styles.bioView}>
+            <Text style={styles.userName}>@yuefi</Text>
+
+            <Text style={{ color: "#eeeeee", marginTop: 5 }}>
+              {userProfileData.userDescription}
             </Text>
+          </View>
 
-            {/* Açıklama alanı */}
-            <View
-              style={{
-                paddingHorizontal: 10,
-                backgroundColor: "#001C30",
-                borderRadius: 5,
-                minHeight: 150,
-              }}
+          <View style={styles.registeredEvents}>
+            <ScrollView horizontal={true} >
+            <View style={styles.eventBadges}></View>
+            <View style={styles.eventBadges}></View>
+            <View style={styles.eventBadges}></View>
+            <View style={styles.eventBadges}></View>
+            <View style={styles.eventBadges}></View>
+            <View style={styles.eventBadges}></View>
+            <View style={styles.eventBadges}></View>
+            </ScrollView>
+          </View>
+
+          <View style={styles.logOutView}>
+            <Button
+              style={styles.logOutButton}
+              onPress={handleLogOut}
+              icon="account-lock"
+              title="Log Out"
+              mode="contained"
+              touchSoundDisabled={true}
             >
-              <Text
-                style={{
-                  color: "#eeeeee",
-                  fontSize: 16,
-                  fontFamily: "CabinRegular",
-                }}
-              >
-                @yuefi
-              </Text>
-
-              <Text style={{ color: "#eeeeee", marginTop: 5 }}>
-                {userProfileData.userDescription}
-              </Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end", marginTop: 20 }}>
-              <Button
-                style={{ backgroundColor: "#ff000022", width: 100,borderRadius:10 }}
-                onPress={handleLogOut}
-                icon="account-lock"
-                title="Log Out"
-                mode="contained"
-                touchSoundDisabled={true}
-              >
-                Log Out
-              </Button>
-            </View>
-          </ScrollView>
-        </View>
+              Log Out
+            </Button>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     borderRadius: 5,
@@ -132,6 +125,40 @@ const styles = StyleSheet.create({
     color: "#eeeeee",
     fontSize: 20,
     paddingLeft: 10,
-    marginBottom:5,
+    marginBottom: 5,
+  },
+  registeredEvents: {
+    borderRadius: 5,
+    marginTop: 5,
+    height: 60,
+    padding:5,
+    flexDirection:'row',
+    backgroundColor: "#001C30",
+  },
+  logOutView: {
+    alignItems: "flex-end",
+    marginTop: 20,
+  },
+  logOutButton: {
+    backgroundColor: "#ff000022",
+    width: 100,
+    borderRadius: 10,
+  },
+  userName: {
+    color: "#eeeeee",
+    fontSize: 16,
+    fontFamily: "CabinRegular",
+  },
+  bioView: {
+    paddingHorizontal: 10,
+    backgroundColor: "#001C30",
+    borderRadius: 5,
+    minHeight: 150,
+  },
+  eventBadges:{
+    height:50,
+    width:50,
+    backgroundColor:'white',
+    marginHorizontal:5,
   },
 });

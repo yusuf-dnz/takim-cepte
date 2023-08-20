@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState ,useEffect } from "react";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -47,23 +47,25 @@ export default function SignUp({ navigation }) {
         password: password,
         displayName: displayName,
         userId: user.uid,
+        profileDetailsCreated: false
         // createdDate: Timestamp.fromDate(new Date()),
       });
-      // console.log(JSON.stringify(user, null, 2))
+      console.log(JSON.stringify(user.createdAt, null, 2))
 
-      onAuthStateChanged(auth, (user) => {
-        console.log("auth state");
-        if (user) {
-          // setUserID(user.uid)
-          console.log("user var");
-
-          navigation.navigate("CreateProfile");
-
-          console.log("giriş yapılmış");
-        } else {
-          console.log("user kayıt sorunu");
-        }
-      });
+        onAuthStateChanged(auth, (user) => {
+          console.log("auth state");
+          if (user) {
+            // setUserID(user.uid)
+            console.log("user var");
+  
+            navigation.navigate("CreateProfile");
+  
+            console.log("giriş yapılmış");
+          } else {
+            console.log("user kayıt sorunu");
+          }
+        });
+      
     }
     return;
   };

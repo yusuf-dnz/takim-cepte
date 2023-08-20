@@ -34,7 +34,12 @@ export default function App() {
       <View style={styles.container}>
       <ExpoStatusBar style="light" />
 
-        <NavigationContainer>
+        <NavigationContainer 
+        theme={{
+          colors: {
+            background: '#282A3A', 
+          },
+        }}>
           <Stack.Navigator>
             <Stack.Screen
               name="LogIn"

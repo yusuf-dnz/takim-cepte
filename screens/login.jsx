@@ -38,7 +38,6 @@ export default function LogIn({ navigation }) {
       console.log("auth state");
       if (user) {
         // setUserID(user.uid)
-        console.log("user var");
 
         navigation.navigate("HomeScreen");
 

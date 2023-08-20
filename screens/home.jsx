@@ -13,12 +13,28 @@ import {
 } from "@react-navigation/bottom-tabs";
 
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function HomeScreen({ navigation }) {
   const theme = useTheme();
   theme.colors.secondaryContainer = "transparent";
+
+const currentUID = auth.currentUser.uid;
+
+useEffect(()=>{
+  const x = async () =>{
+    const docRef = doc(db, "users", currentUID);
+    const docSnap = await getDoc(docRef);
+    if(docSnap.data().profileDetailsCreated){}
+    else{navigation.navigate('CreateProfile')} 
+  }
+  x();
+},[])
+
+
   return (
     <Tab.Navigator
       style={{backgroundColor:'black'}}
