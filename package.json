@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@expo/webpack-config": "^18.0.1",
+    "@react-native-community/datetimepicker": "6.7.3",
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/core": "^6.4.9",
     "@react-navigation/material-bottom-tabs": "^6.2.16",
@@ -17,10 +18,13 @@
     "@react-navigation/native-stack": "^6.9.13",
     "@react-navigation/stack": "^6.3.17",
     "@reduxjs/toolkit": "^1.9.5",
+    "axios": "^1.4.0",
     "expo": "~48.0.18",
+    "expo-font": "~11.1.1",
     "expo-image-picker": "~14.1.1",
     "expo-linear-gradient": "~12.1.2",
     "expo-status-bar": "~1.4.4",
+    "expo-system-ui": "~2.2.1",
     "firebase": "^10.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -32,10 +36,7 @@
     "react-native-screens": "~3.20.0",
     "react-native-vector-icons": "^10.0.0",
     "react-native-web": "~0.18.10",
-    "redux": "^4.2.1",
-    "expo-system-ui": "~2.2.1",
-    "@react-native-community/datetimepicker": "6.7.3",
-    "expo-font": "~11.1.1"
+    "redux": "^4.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -148,7 +148,7 @@ export default function Search({ navigation }) {
                       <Avatar.Image
                         size={64}
                         style={{}}
-                        source={{ uri: user.storageProfileImageURL }}
+                        source={{ uri: user.storageProfileImageURL??'https://firebasestorage.googleapis.com/v0/b/takimcepte.appspot.com/o/UserAvatars%2Fdefault.jpg?alt=media&token=30eeda7b-2ffc-472c-a5be-4ede8b28cf0b' }}
                       />
                     )}
                     onPress={() =>

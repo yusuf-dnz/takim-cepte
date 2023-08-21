@@ -78,7 +78,7 @@ export default function Profile({ navigation }) {
           </View>
 
           <View style={styles.registeredEvents}>
-            <ScrollView horizontal={true} >
+            <ScrollView horizontal={true} scr>
             <View style={styles.eventBadges}></View>
             <View style={styles.eventBadges}></View>
             <View style={styles.eventBadges}></View>

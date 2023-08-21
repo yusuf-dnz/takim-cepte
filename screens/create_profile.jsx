@@ -6,24 +6,23 @@ import {
   Image,
   ScrollView,
   TextInput,
-  Button,
   Alert,
   Modal,
   Pressable,
 } from "react-native";
 import { IconButton, List, MD3Colors } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import StaticTopBar from "../components/StaticTopBar";
 import { auth, db, storage } from "../firebase";
 import { Timestamp, addDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import { SegmentedButtons } from "react-native-paper";
+import { SegmentedButtons, Button } from "react-native-paper";
+import axios from "axios";
 
-
-console.log("CREATE PROFILE")
+console.log("CREATE PROFILE");
 
 export const uriToBlob = (uri) => {
   return new Promise((resolve, reject) => {
@@ -43,12 +42,21 @@ export const uriToBlob = (uri) => {
 };
 
 export default function CreateProfile({ navigation }) {
+  const [countrysData, setCountrysData] = useState([]);
+  const [statesData, setStatesData] = useState([]);
+  const [citiesData, setCitiesData] = useState([]);
+
+  const [country, setCountry] = useState(null);
+  const [state, setState] = useState(null);
+  const [cities, setCities] = useState(null);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState(null); //Modal içeriği
+
   const [description, onChangeDescription] = React.useState("");
   const [image, setImage] = useState(null);
   const [storageImageURL, setStorageImageURL] = useState("");
   const [date, setDate] = useState(new Date(1598051730000));
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedContent, setSelectedContent] = useState(null);//Modal içeriği
   const [gender, setGender] = React.useState("other");
   const userID = auth.currentUser.uid;
 
@@ -59,35 +67,232 @@ export default function CreateProfile({ navigation }) {
 
   const showDatepicker = (currentMode) => {
     DateTimePickerAndroid.open({
-      
       value: date,
       onChange,
       mode: "date",
       is24Hour: true,
     });
   };
+  //////////////////////////////////////////////////////////
+  const countrysLister = async () => {
+    setState(null)
+    setCities(null)
+    var config = {
+      method: "get",
+      url: "https://api.countrystatecity.in/v1/countries/",
+      headers: {
+        "X-CSCAPI-KEY":
+          "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
+      },
+    };
 
-  const regionModal = () => {
-    setSelectedContent(
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.textStyle}>OK</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
+    axios(config)
+      .then(function (response) {
+        // console.log(JSON.stringify(response.data, null, 2));
+        setCountrysData(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
     setModalVisible(true);
   };
 
+  useEffect(() => {
+    console.log(country);
+
+    setModalContent(
+      <>
+        <ScrollView>
+          {countrysData.map((region, index) => (
+            <React.Fragment key={index}>
+              <Pressable
+                onPress={() => {
+                  setCountry(region), setModalVisible(false);
+                }}
+                style={({ pressed }) => [
+                  {
+                    backgroundColor: pressed ? "#001C30" : "transparent",
+                  },
+                ]}
+              >
+                {({ pressed }) => (
+                  <Text
+                    style={{
+                      textAlign: "left",
+                      fontSize: 20,
+                      color: "#eeeeee",
+                      padding: 8,
+                    }}
+                  >
+                    {region.name}
+                  </Text>
+                )}
+              </Pressable>
+            </React.Fragment>
+          ))}
+        </ScrollView>
+        <Pressable
+          style={[styles.button, styles.buttonClose]}
+          onPress={() => setModalVisible(false)}
+        >
+          <Text style={styles.textStyle}>OK</Text>
+        </Pressable>
+      </>
+    );
+  }, [countrysData]);
+
+  const statesLister = () => {
+    setCities(null)
+
+    if (country == null) {
+      console.log("ülke seçmediniz");
+    } else {
+      const stateUrl = `https://api.countrystatecity.in/v1/countries/${country.iso2}/states/`;
+
+      var config = {
+        method: "get",
+        url: stateUrl,
+        headers: {
+          "X-CSCAPI-KEY":
+            "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
+        },
+      };
+      console.log(config);
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data, null, 2));
+          setStatesData(response.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+      setModalVisible(true);
+    }
+  };
+
+  useEffect(() => {
+    console.log(state);
+
+    setModalContent(
+      <>
+        <ScrollView>
+          {statesData.map((region, index) => (
+            <React.Fragment key={index}>
+              <Pressable
+                onPress={() => {
+                  setState(region), setModalVisible(false);
+                }}
+                style={({ pressed }) => [
+                  {
+                    backgroundColor: pressed ? "#001C30" : "transparent",
+                  },
+                ]}
+              >
+                {({ pressed }) => (
+                  <Text
+                    style={{
+                      textAlign: "left",
+                      fontSize: 20,
+                      color: "#eeeeee",
+                      padding: 8,
+                    }}
+                  >
+                    {region.name}
+                  </Text>
+                )}
+              </Pressable>
+            </React.Fragment>
+          ))}
+        </ScrollView>
+        <Pressable
+          style={[styles.button, styles.buttonClose]}
+          onPress={() => setModalVisible(false)}
+        >
+          <Text style={styles.textStyle}>OK</Text>
+        </Pressable>
+      </>
+    );
+  }, [statesData]);
+
+  const citiesLister = () => {
+    if (state == null) {
+      console.log("şehir seçmediniz");
+    } else {
+      const citiesUrl = `https://api.countrystatecity.in/v1/countries/${country.iso2}/states/${state.iso2}/cities/`;
+
+      var config = {
+        method: "get",
+        url: citiesUrl,
+        headers: {
+          "X-CSCAPI-KEY":
+            "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
+        },
+      };
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data, null, 2));
+          setCitiesData(response.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+      setModalVisible(true);
+    }
+  };
+
+  useEffect(() => {
+    console.log(cities);
+    setModalContent(
+      <>
+        <ScrollView>
+          {citiesData.map((region, index) => (
+            <React.Fragment key={index}>
+              <Pressable
+                onPress={() => {
+                  setCities(region), setModalVisible(false);
+                }}
+                style={({ pressed }) => [
+                  {
+                    backgroundColor: pressed ? "#001C30" : "transparent",
+                  },
+                ]}
+              >
+                {({ pressed }) => (
+                  <Text
+                    style={{
+                      textAlign: "left",
+                      fontSize: 20,
+                      color: "#eeeeee",
+                      padding: 8,
+                    }}
+                  >
+                    {region.name}
+                  </Text>
+                )}
+              </Pressable>
+            </React.Fragment>
+          ))}
+        </ScrollView>
+        <Pressable
+          style={[styles.button, styles.buttonClose]}
+          onPress={() => setModalVisible(false)}
+        >
+          <Text style={styles.textStyle}>OK</Text>
+        </Pressable>
+      </>
+    );
+  }, [citiesData]);
+  ////////////////////////////////////////////////////////
   const addProfileDetails = async () => {
     await updateDoc(doc(db, "users", auth.currentUser.uid), {
-      country: "Türkiye",
-      province:"Samsun",
-      district:"Atakum",
+      country: country,
+      province: state,
+      district: cities,
       userGender: gender,
       userDescription: description,
       bornDate: Timestamp.fromDate(date),
@@ -98,7 +303,6 @@ export default function CreateProfile({ navigation }) {
     navigation.navigate("HomeScreen");
   };
 
-  // console.log(auth.currentUser.uid);
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -110,10 +314,7 @@ export default function CreateProfile({ navigation }) {
     if (!result.canceled) {
       setImage(result.assets[0].uri);
 
-      const storageRef = ref(
-        storage,
-        `UserAvatars/${userID}/pp.jpg`
-      );
+      const storageRef = ref(storage, `UserAvatars/${userID}/pp.jpg`);
       const blobFile = await uriToBlob(result.assets[0].uri);
       await uploadBytes(storageRef, blobFile).then(async (snapshot) => {
         const url = await getDownloadURL(storageRef);
@@ -122,11 +323,10 @@ export default function CreateProfile({ navigation }) {
     }
   };
 
-
   return (
     <View>
       <SafeAreaView style={{ backgroundColor: "#282A3A", height: "100%" }}>
-        <StaticTopBar text={"Create Profile"} />
+        <StaticTopBar text={"Profilini Oluştur"} />
 
         <ScrollView style={{ padding: 10 }}>
           <View style={styles.container}>
@@ -150,7 +350,7 @@ export default function CreateProfile({ navigation }) {
               backgroundColor: "#001C30",
               borderBottomColor: "#000000",
               minHeight: 150,
-              borderRadius:5
+              borderRadius: 5,
             }}
           >
             <TextInput
@@ -166,21 +366,25 @@ export default function CreateProfile({ navigation }) {
           </View>
 
           <Pressable
-            style={{ marginTop: 5, padding: 10, backgroundColor: "#001C30",borderRadius:5 }}
+            style={{
+              marginTop: 5,
+              padding: 10,
+              backgroundColor: "#001C30",
+              borderRadius: 5,
+            }}
             onPress={() => showDatepicker()}
           >
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
-                
               }}
             >
               <Text style={{ color: "#eeeeee66", fontSize: 20 }}>
                 Born Date:{" "}
               </Text>
               <Text style={{ color: "#eeeeee66", fontSize: 20 }}>
-                {date.getDate()} / {date.getMonth()+1} / {date.getFullYear()}
+                {date.getDate()} / {date.getMonth() + 1} / {date.getFullYear()}
               </Text>
 
               <Text
@@ -199,25 +403,49 @@ export default function CreateProfile({ navigation }) {
             style={{
               marginTop: 5,
               backgroundColor: "#001C30",
-              height: 40,
-              borderRadius:5,
-
+              borderRadius: 5,
+              flexDirection: "row",
+              padding: 10,
             }}
           >
-            <Pressable onPress={() => regionModal()}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  width: "60%",
-                  padding: 10,
-                }}
+            <Text>Konum</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                width: "60%",
+              }}
+            >
+              <Button
+                rippleColor="white"
+                textColor="#eeeeee66"
+                onPress={() => countrysLister()}
+                style={styles.regionText}
               >
-                <Text style={styles.regionText}> Ülke </Text>
-                <Text style={styles.regionText}>/ Şehir </Text>
-                <Text style={styles.regionText}>/ İlçe </Text>
-              </View>
-            </Pressable>
+                {country?.name ?? "Ülke"}
+              </Button>
+              <Text style={{ fontSize: 25, color: "#eeeeee66" }}>/ </Text>
+
+              <Button
+                rippleColor="white"
+                textColor="#eeeeee66"
+                eeeeee66
+                onPress={() => statesLister()}
+                style={styles.regionText}
+              >
+                {state?.name ?? "Şehir"}
+              </Button>
+              <Text style={{ fontSize: 25, color: "#eeeeee66" }}>/ </Text>
+
+              <Button
+                rippleColor="white"
+                textColor="#eeeeee66"
+                onPress={() => citiesLister()}
+                style={styles.regionText}
+              >
+                {cities?.name ?? "İlçe"}
+              </Button>
+            </View>
           </View>
 
           <View
@@ -229,30 +457,28 @@ export default function CreateProfile({ navigation }) {
             }}
           >
             <SegmentedButtons
-              style={{borderRadius:20,backgroundColor:'#001C30'}}
-              
+              style={{ borderRadius: 20, backgroundColor: "#001C30" }}
               value={gender}
               onValueChange={setGender}
               buttons={[
                 {
                   value: "male",
                   label: "Erkek",
-                  checkedColor: "blue",
-                  uncheckedColor:"white",
+                  checkedColor: "green",
+                  uncheckedColor: "white",
                   icon: "face-man-shimmer",
                 },
                 {
                   value: "other",
                   label: "Belirtme",
                   checkedColor: "red",
-                  uncheckedColor:"white",
-
+                  uncheckedColor: "white",
                 },
                 {
                   value: "female",
                   label: "Kadın",
                   checkedColor: "purple",
-                  uncheckedColor:"white",
+                  uncheckedColor: "white",
 
                   icon: "face-woman-shimmer",
                 },
@@ -270,7 +496,7 @@ export default function CreateProfile({ navigation }) {
                 setModalVisible(!modalVisible);
               }}
             >
-              {selectedContent}
+              <View style={styles.modalView}>{modalContent}</View>
             </Modal>
           </View>
         </ScrollView>
@@ -304,12 +530,14 @@ const styles = StyleSheet.create({
   },
 
   regionText: {
-    color: "#eeeeeeaa",
+    backgroundColor: "transparent",
+    height: 40,
+    borderRadius: 5,
   },
   container: {
-    borderRadius:5,
-    width: '100%',
-    height: Dimensions.get("window").width-20, // Eğer dörtgen bir avatar isteniyorsa bu kısmı özelleştirebilirsiniz.
+    borderRadius: 5,
+    width: "100%",
+    height: Dimensions.get("window").width - 20,
     overflow: "hidden",
     backgroundColor: "#00000095",
   },
@@ -325,12 +553,10 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    width: 400,
     margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
+    backgroundColor: "#282A3A",
+    borderRadius: 5,
     padding: 35,
-    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -355,7 +581,6 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 15,
-    textAlign: "center",
   },
   datePickerTexts: {
     textAlign: "center",
