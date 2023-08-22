@@ -40,7 +40,7 @@ export default function Profile({ navigation }) {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        // console.log("Document data:", docSnap.data());
+        console.log("Document data:", docSnap.data());
         setUserProfileData(docSnap.data());
       } else {
         // docSnap.data() will be undefined in this case
@@ -50,6 +50,22 @@ export default function Profile({ navigation }) {
 
     getUserProfile();
   }, []);
+
+   let formattedDate;
+  console.log(userProfileData.createdDate.seconds)
+// },[userProfileData])
+// useEffect(()=>{
+  const firebaseTimestamp = userProfileData.createdDate.seconds * 1000;
+
+  const date = new Date(firebaseTimestamp);
+
+  const options = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+
+   formattedDate = date.toLocaleDateString("tr-TR", options);
 
   return (
     <View style={{ backgroundColor: "#282A3A" }}>
@@ -79,16 +95,18 @@ export default function Profile({ navigation }) {
 
           <View style={styles.registeredEvents}>
             <ScrollView horizontal={true} scr>
-            <View style={styles.eventBadges}></View>
-            <View style={styles.eventBadges}></View>
-            <View style={styles.eventBadges}></View>
-            <View style={styles.eventBadges}></View>
-            <View style={styles.eventBadges}></View>
-            <View style={styles.eventBadges}></View>
-            <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
+              <View style={styles.eventBadges}></View>
             </ScrollView>
           </View>
-
+          <Text style={{ textAlign: "right", color: "#eeeeee", margin: 10 }}>
+            Katılım: {formattedDate??""}
+          </Text>
           <View style={styles.logOutView}>
             <Button
               style={styles.logOutButton}
@@ -131,8 +149,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 5,
     height: 60,
-    padding:5,
-    flexDirection:'row',
+    padding: 5,
+    flexDirection: "row",
     backgroundColor: "#001C30",
   },
   logOutView: {
@@ -155,10 +173,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     minHeight: 150,
   },
-  eventBadges:{
-    height:50,
-    width:50,
-    backgroundColor:'white',
-    marginHorizontal:5,
+  eventBadges: {
+    height: 50,
+    width: 50,
+    backgroundColor: "white",
+    marginHorizontal: 5,
   },
 });

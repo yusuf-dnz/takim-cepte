@@ -1,4 +1,4 @@
-import { useState ,useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -9,10 +9,8 @@ import { TextInput, Avatar, Button } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import { auth, db } from "../firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore";
-
-// import { NativeBaseProvider, Box } from "native-base";
 
 export default function SignUp({ navigation }) {
   const [email, setEmail] = useState("");
@@ -31,12 +29,15 @@ export default function SignUp({ navigation }) {
 
   const handleSignUp = async () => {
     if (password != rePassword) {
+      
       console.log("şifre eşleşmedi kontrol et"); //toast message ekle
       setPasswordMatch(false);
     } else {
-      console.log("şifre eşleşti"); //toast message ekle
-
       setPasswordMatch(true);
+
+      const date = new Date()
+      const createdDate = Timestamp.fromDate(date)
+
       const { user } = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -47,25 +48,22 @@ export default function SignUp({ navigation }) {
         password: password,
         displayName: displayName,
         userId: user.uid,
-        profileDetailsCreated: false
-        // createdDate: Timestamp.fromDate(new Date()),
+        profileDetailsCreated: false,
+        createdDate: createdDate,
       });
-      console.log(JSON.stringify(user.createdAt, null, 2))
 
-        onAuthStateChanged(auth, (user) => {
-          console.log("auth state");
-          if (user) {
-            // setUserID(user.uid)
-            console.log("user var");
-  
-            navigation.navigate("CreateProfile");
-  
-            console.log("giriş yapılmış");
-          } else {
-            console.log("user kayıt sorunu");
-          }
-        });
-      
+      onAuthStateChanged(auth, (user) => {
+        console.log("auth state");
+        if (user) {
+          console.log("user var");
+
+          navigation.navigate("CreateProfile");
+
+          console.log("giriş yapılmış");
+        } else {
+          console.log("user kayıt sorunu");
+        }
+      });
     }
     return;
   };
@@ -164,11 +162,11 @@ const styles = StyleSheet.create({
   },
 
   view: {
-    marginTop: '50%',
+    marginTop: "50%",
   },
 
   input: {
     backgroundColor: "transparent",
-    marginVertical:10,
+    marginVertical: 10,
   },
 });

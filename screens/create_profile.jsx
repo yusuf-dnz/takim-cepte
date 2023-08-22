@@ -56,7 +56,7 @@ export default function CreateProfile({ navigation }) {
   const [description, onChangeDescription] = React.useState("");
   const [image, setImage] = useState(null);
   const [storageImageURL, setStorageImageURL] = useState("");
-  const [date, setDate] = useState(new Date(1598051730000));
+  const [date, setDate] = useState(new Date(1110000000000));
   const [gender, setGender] = React.useState("other");
   const userID = auth.currentUser.uid;
 
@@ -71,12 +71,12 @@ export default function CreateProfile({ navigation }) {
       onChange,
       mode: "date",
       is24Hour: true,
+      maximumDate: new Date(1110000000000),
     });
   };
+
   //////////////////////////////////////////////////////////
   const countrysLister = async () => {
-    setState(null)
-    setCities(null)
     var config = {
       method: "get",
       url: "https://api.countrystatecity.in/v1/countries/",
@@ -88,7 +88,8 @@ export default function CreateProfile({ navigation }) {
 
     axios(config)
       .then(function (response) {
-        // console.log(JSON.stringify(response.data, null, 2));
+        setState(null);
+        setCities(null);
         setCountrysData(response.data);
       })
       .catch(function (error) {
@@ -99,8 +100,6 @@ export default function CreateProfile({ navigation }) {
   };
 
   useEffect(() => {
-    console.log(country);
-
     setModalContent(
       <>
         <ScrollView>
@@ -143,8 +142,6 @@ export default function CreateProfile({ navigation }) {
   }, [countrysData]);
 
   const statesLister = () => {
-    setCities(null)
-
     if (country == null) {
       console.log("ülke seçmediniz");
     } else {
@@ -158,11 +155,10 @@ export default function CreateProfile({ navigation }) {
             "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
         },
       };
-      console.log(config);
 
       axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data, null, 2));
+          setCities(null);
           setStatesData(response.data);
         })
         .catch(function (error) {
@@ -174,8 +170,6 @@ export default function CreateProfile({ navigation }) {
   };
 
   useEffect(() => {
-    console.log(state);
-
     setModalContent(
       <>
         <ScrollView>
@@ -246,7 +240,6 @@ export default function CreateProfile({ navigation }) {
   };
 
   useEffect(() => {
-    console.log(cities);
     setModalContent(
       <>
         <ScrollView>
@@ -289,10 +282,20 @@ export default function CreateProfile({ navigation }) {
   }, [citiesData]);
   ////////////////////////////////////////////////////////
   const addProfileDetails = async () => {
-    await updateDoc(doc(db, "users", auth.currentUser.uid), {
-      country: country,
-      province: state,
-      district: cities,
+    if (
+      !country ||
+      !state ||
+      !storageImageURL
+    ) {
+      // Eksik veri var, kullanıcıya bir uyarı gösterilebilir
+      console.log("Lütfen zorunlu alanları doldurun.");
+      return;
+    }
+
+    await updateDoc(doc(db, "users", userID), {
+      country: country.name,
+      state: state.name,
+      cities: cities?.name ?? null,
       userGender: gender,
       userDescription: description,
       bornDate: Timestamp.fromDate(date),
@@ -356,7 +359,7 @@ export default function CreateProfile({ navigation }) {
             <TextInput
               editable
               multiline
-              placeholder="Kendini açıkla :)"
+              placeholder="Açıklama ekleyebilirsin..."
               placeholderTextColor={"#eeeeeeaa"}
               maxLength={400}
               onChangeText={(text) => onChangeDescription(text)}
@@ -377,17 +380,14 @@ export default function CreateProfile({ navigation }) {
             <View
               style={{
                 flexDirection: "row",
-                justifyContent: "space-between",
+                justifyContent: "center",
               }}
             >
-              <Text style={{ color: "#eeeeee66", fontSize: 20 }}>
-                Born Date:{" "}
-              </Text>
               <Text style={{ color: "#eeeeee66", fontSize: 20 }}>
                 {date.getDate()} / {date.getMonth() + 1} / {date.getFullYear()}
               </Text>
 
-              <Text
+              {/* <Text
                 style={{
                   color: "red",
                   fontSize: 10,
@@ -395,7 +395,7 @@ export default function CreateProfile({ navigation }) {
                 }}
               >
                 Profilinde görüntülenmez*
-              </Text>
+              </Text> */}
             </View>
           </Pressable>
 
@@ -404,16 +404,15 @@ export default function CreateProfile({ navigation }) {
               marginTop: 5,
               backgroundColor: "#001C30",
               borderRadius: 5,
-              flexDirection: "row",
               padding: 10,
+              alignItems: "center",
             }}
           >
-            <Text>Konum</Text>
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
-                width: "60%",
+                width: "80%",
               }}
             >
               <Button
@@ -531,6 +530,7 @@ const styles = StyleSheet.create({
 
   regionText: {
     backgroundColor: "transparent",
+    maxWidth: 100,
     height: 40,
     borderRadius: 5,
   },

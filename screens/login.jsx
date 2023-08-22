@@ -10,6 +10,11 @@ import {
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { auth, authState } from "../firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+import { Timestamp } from "firebase/firestore";
+
+// const currentDate = new Date();
+// const timestamp = Timestamp.fromDate(currentDate);
+// console.log(timestamp);
 
 export default function LogIn({ navigation }) {
   // const theme = useTheme();
