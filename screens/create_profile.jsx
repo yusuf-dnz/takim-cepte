@@ -10,12 +10,22 @@ import {
   Modal,
   Pressable,
 } from "react-native";
-import { IconButton, List, MD3Colors } from "react-native-paper";
+import { Avatar, Badge, IconButton, List, MD3Colors } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import StaticTopBar from "../components/StaticTopBar";
 import { auth, db, storage } from "../firebase";
-import { Timestamp, addDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -285,7 +295,8 @@ export default function CreateProfile({ navigation }) {
     if (
       !country ||
       !state ||
-      !storageImageURL
+      !storageImageURL ||
+      nameIcon.availableName == false
     ) {
       // Eksik veri var, kullanıcıya bir uyarı gösterilebilir
       console.log("Lütfen zorunlu alanları doldurun.");
@@ -301,6 +312,7 @@ export default function CreateProfile({ navigation }) {
       bornDate: Timestamp.fromDate(date),
       storageProfileImageURL: storageImageURL,
       profileDetailsCreated: true,
+      userName: uniqueName,
     });
 
     navigation.navigate("HomeScreen");
@@ -326,6 +338,49 @@ export default function CreateProfile({ navigation }) {
     }
   };
 
+  const [uniqueName, setUniqueName] = useState("");
+  const [nameIcon, setNameIcon] = useState({
+    availableName: false,
+    color: "#4477CE",
+    icon: "arrow-left-thick",
+  });
+  const allowedPattern = /^[a-z0-9]*$/; // Sadece harf ve rakamlar izin veriliyor
+
+  const handleInputChange = async (newValue) => {
+    console.log(newValue)
+    if (newValue == "") {
+      console.log("boş")
+      setUniqueName(newValue);
+      setNameIcon({
+        availableName: false,
+        color: "#4477CE",
+        icon: "arrow-left-thick",
+      });
+    } else {
+    if (allowedPattern.test(newValue)) {
+        setUniqueName(newValue);
+
+        const userNames = collection(db, "users");
+        const q = query(userNames, where("userName", "==", newValue));
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot.empty);
+        if (querySnapshot.empty) {
+          setNameIcon({
+            availableName: true,
+            color: "green",
+            icon: "check-bold",
+          });
+        } else {
+          setNameIcon({
+            availableName: false,
+            color: "red",
+            icon: "close-thick",
+          });
+        }
+      }
+    }
+  };
+
   return (
     <View>
       <SafeAreaView style={{ backgroundColor: "#282A3A", height: "100%" }}>
@@ -345,6 +400,46 @@ export default function CreateProfile({ navigation }) {
               animated={true}
               size={20}
               onPress={pickImage}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              padding: 8,
+              justifyContent: "space-around",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "CabinRegular",
+                color: "#eeeeee",
+                fontSize: 25,
+              }}
+            >
+              @
+            </Text>
+            <TextInput
+              style={{
+                width: "80%",
+                height: 40,
+                borderBottomWidth: 1,
+                paddingHorizontal: 5,
+                color: "#eeeeee",
+                fontFamily: "CabinRegular",
+                fontSize: 20,
+              }}
+              inlineImageLeft=""
+              onChangeText={handleInputChange}
+              value={uniqueName}
+              placeholder="Kullanıcı adı"
+              placeholderTextColor={"#eeeeeeaa"}
+            />
+            <Avatar.Icon
+              style={{ backgroundColor: "transparent" }}
+              color={nameIcon.color}
+              size={40}
+              icon={nameIcon.icon}
             />
           </View>
 
@@ -379,23 +474,18 @@ export default function CreateProfile({ navigation }) {
           >
             <View
               style={{
-                flexDirection: "row",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: "#eeeeee66", fontSize: 20 }}>
-                {date.getDate()} / {date.getMonth() + 1} / {date.getFullYear()}
-              </Text>
-
-              {/* <Text
+              <Text
                 style={{
-                  color: "red",
-                  fontSize: 10,
-                  textAlign: "right",
+                  color: "#eeeeee66",
+                  fontSize: 20,
+                  textAlign: "center",
                 }}
               >
-                Profilinde görüntülenmez*
-              </Text> */}
+                {date.getDate()} / {date.getMonth() + 1} / {date.getFullYear()}
+              </Text>
             </View>
           </Pressable>
 

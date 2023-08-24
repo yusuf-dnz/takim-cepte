@@ -12,6 +12,7 @@ import ChatScreen from "./screens/chat_screen";
 import VisitProfile from "./screens/visit_profile";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
 import { useFonts } from "expo-font";
+import { Title } from "react-native-paper";
 
 const Stack = createStackNavigator();
 
@@ -64,7 +65,10 @@ export default function App() {
             <Stack.Screen
               name="ChatScreen"
               component={ChatScreen}
-              options={{ headerShown: true, title: "Chat List" }}
+              options={{ headerShown: true ,title:'',headerTintColor:'white',}}
+            
+              
+              
             />
             <Stack.Screen
               name="VisitProfile"

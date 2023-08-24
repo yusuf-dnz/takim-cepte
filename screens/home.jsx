@@ -6,12 +6,6 @@ import Search from "./search";
 import { StyleSheet } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useTheme, Button } from "react-native-paper";
-import {
-  BottomTabBarHeightContext,
-  createBottomTabNavigator,
-  useBottomTabBarHeight,
-} from "@react-navigation/bottom-tabs";
-
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";

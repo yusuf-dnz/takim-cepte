@@ -23,6 +23,7 @@ import {
   query,
   addDoc,
   or,
+  Timestamp,
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { getDownloadURL, ref } from "firebase/storage";
@@ -37,6 +38,9 @@ export default function VisitProfile({ navigation }) {
   const targetUserData = route.params.targetUserData;
 
   const createChat = async (targetID) => {
+    const date = new Date();
+    const lastView = Timestamp.fromDate(date);
+
     const docRef = query(
       collection(db, "chats"),
       or(
@@ -48,6 +52,10 @@ export default function VisitProfile({ navigation }) {
     if (querySnapshot.empty) {
       const create = await addDoc(collection(db, "chats"), {
         participants: [currentUserID, targetID],
+        lastViews: {
+          [currentUserID]: lastView,
+          [targetID]: lastView,
+        },
       });
       // console.log(create.id)
       console.log("chat oluşturuldu");
@@ -58,8 +66,7 @@ export default function VisitProfile({ navigation }) {
     }
   };
 
-  
-  const firebaseTimestamp = targetUserData.createdDate.seconds*1000;
+  const firebaseTimestamp = targetUserData.createdDate.seconds * 1000;
 
   // Timestamp'i JavaScript tarih nesnesine dönüştürme
   const date = new Date(firebaseTimestamp);
@@ -73,7 +80,6 @@ export default function VisitProfile({ navigation }) {
 
   // Tarihi istenen formata dönüştürme
   const formattedDate = date.toLocaleDateString("tr-TR", options);
-
 
   return (
     <SafeAreaView style={{ backgroundColor: "#282A3A" }}>
@@ -130,7 +136,7 @@ export default function VisitProfile({ navigation }) {
               fontFamily: "CabinRegular",
             }}
           >
-            {/* {targetUserData.username} */}@_ysfsea
+            @{targetUserData.userName}
           </Text>
 
           <Text style={{ color: "white", marginTop: 5 }}>
@@ -138,7 +144,7 @@ export default function VisitProfile({ navigation }) {
           </Text>
         </View>
 
-        <Text style={{textAlign:'right',color:'#eeeeee',margin:10}}>
+        <Text style={{ textAlign: "right", color: "#eeeeee", margin: 10 }}>
           Katılım: {formattedDate}
         </Text>
       </ScrollView>

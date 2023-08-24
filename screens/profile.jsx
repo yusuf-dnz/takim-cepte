@@ -35,15 +35,20 @@ export default function Profile({ navigation }) {
   const [userProfileData, setUserProfileData] = useState({});
   useEffect(() => {
     const getUserProfile = async () => {
-      console.log("PROFILE JS getUserProfile ");
       const docRef = doc(db, "users", userID);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
-        setUserProfileData(docSnap.data());
+        const firebaseTimestamp = docSnap.data().createdDate.seconds * 1000;
+        const date = new Date(firebaseTimestamp);
+        const options = {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        };
+        const formattedDate = date.toLocaleDateString("tr-TR", options);
+        setUserProfileData({...docSnap.data(),registeredDate: formattedDate});
       } else {
-        // docSnap.data() will be undefined in this case
         console.log("No such document!");
       }
     };
@@ -51,21 +56,6 @@ export default function Profile({ navigation }) {
     getUserProfile();
   }, []);
 
-   let formattedDate;
-  console.log(userProfileData.createdDate.seconds)
-// },[userProfileData])
-// useEffect(()=>{
-  const firebaseTimestamp = userProfileData.createdDate.seconds * 1000;
-
-  const date = new Date(firebaseTimestamp);
-
-  const options = {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  };
-
-   formattedDate = date.toLocaleDateString("tr-TR", options);
 
   return (
     <View style={{ backgroundColor: "#282A3A" }}>
@@ -86,7 +76,7 @@ export default function Profile({ navigation }) {
           </Text>
 
           <View style={styles.bioView}>
-            <Text style={styles.userName}>@yuefi</Text>
+            <Text style={styles.userName}>@{userProfileData.userName}</Text>
 
             <Text style={{ color: "#eeeeee", marginTop: 5 }}>
               {userProfileData.userDescription}
@@ -105,7 +95,7 @@ export default function Profile({ navigation }) {
             </ScrollView>
           </View>
           <Text style={{ textAlign: "right", color: "#eeeeee", margin: 10 }}>
-            Katılım: {formattedDate??""}
+            Katılım: {userProfileData.registeredDate??""}
           </Text>
           <View style={styles.logOutView}>
             <Button

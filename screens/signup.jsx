@@ -45,7 +45,6 @@ export default function SignUp({ navigation }) {
       );
       await setDoc(doc(db, "users", user.uid), {
         email: email,
-        password: password,
         displayName: displayName,
         userId: user.uid,
         profileDetailsCreated: false,
