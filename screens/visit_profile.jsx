@@ -52,10 +52,8 @@ export default function VisitProfile({ navigation }) {
     if (querySnapshot.empty) {
       const create = await addDoc(collection(db, "chats"), {
         participants: [currentUserID, targetID],
-        lastViews: {
-          [currentUserID]: lastView,
-          [targetID]: lastView,
-        },
+        [currentUserID]: lastView,
+        [targetID]: lastView,
       });
       // console.log(create.id)
       console.log("chat oluşturuldu");

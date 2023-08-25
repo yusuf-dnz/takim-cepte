@@ -60,12 +60,12 @@ export default function App() {
             <Stack.Screen
               name="HomeScreen"
               component={HomeScreen}
-              options={{ headerShown: false, title: "SEA" }}
+              options={{ headerShown: false}}
             />
             <Stack.Screen
               name="ChatScreen"
               component={ChatScreen}
-              options={{ headerShown: true ,title:'',headerTintColor:'white',}}
+              options={{ headerShown: false}}
             
               
               

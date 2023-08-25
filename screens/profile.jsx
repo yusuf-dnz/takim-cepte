@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { auth, db, storage } from "../firebase";
-import { Avatar, Divider, Button } from "react-native-paper";
+import { Avatar, Divider, Button, IconButton } from "react-native-paper";
 import StaticTopBar from "../components/StaticTopBar";
 import { StyleSheet } from "react-native";
 import {
@@ -47,7 +47,10 @@ export default function Profile({ navigation }) {
           year: "numeric",
         };
         const formattedDate = date.toLocaleDateString("tr-TR", options);
-        setUserProfileData({...docSnap.data(),registeredDate: formattedDate});
+        setUserProfileData({
+          ...docSnap.data(),
+          registeredDate: formattedDate,
+        });
       } else {
         console.log("No such document!");
       }
@@ -56,6 +59,25 @@ export default function Profile({ navigation }) {
     getUserProfile();
   }, []);
 
+  const [events, setEvents] = useState([]);
+  
+
+  useEffect(() => {
+    setEvents([])
+    const eventArray = userProfileData.registeredEvents;
+
+    eventArray?.map((eventName) => {
+      console.log("event map")
+      getEventAsset(eventName);
+    });
+  }, [userProfileData]);
+
+  const getEventAsset = async (x) => {
+    const docRef = doc(db, "events", x);
+    const docSnap = await getDoc(docRef);
+    setEvents((prevData) => [...prevData, docSnap.data()]);
+  };
+  console.log(events);
 
   return (
     <View style={{ backgroundColor: "#282A3A" }}>
@@ -82,20 +104,35 @@ export default function Profile({ navigation }) {
               {userProfileData.userDescription}
             </Text>
           </View>
+          <View style={{ flexDirection: "row" }}>
+            <View style={styles.registeredEvents}>
+              <ScrollView horizontal={true}>
+                {events.map((event, index) => (
+                  <React.Fragment key={index}>
+                    <Image
+                      style={{width:50,marginHorizontal:5}}
+                      
+                      source={{
+                        uri: event.eventIconURL,
+                      }}
+                    />
+                  </React.Fragment>
+                ))}
 
-          <View style={styles.registeredEvents}>
-            <ScrollView horizontal={true} scr>
-              <View style={styles.eventBadges}></View>
-              <View style={styles.eventBadges}></View>
-              <View style={styles.eventBadges}></View>
-              <View style={styles.eventBadges}></View>
-              <View style={styles.eventBadges}></View>
-              <View style={styles.eventBadges}></View>
-              <View style={styles.eventBadges}></View>
-            </ScrollView>
+                {/* <View style={styles.eventBadges}>
+                  
+                  </View> */}
+              </ScrollView>
+              <IconButton
+                icon="plus-thick"
+                iconColor="white"
+                size={20}
+                onPress={() => console.log("Pressed")}
+              />
+            </View>
           </View>
           <Text style={{ textAlign: "right", color: "#eeeeee", margin: 10 }}>
-            Katılım: {userProfileData.registeredDate??""}
+            Katılım: {userProfileData.registeredDate ?? ""}
           </Text>
           <View style={styles.logOutView}>
             <Button
@@ -136,6 +173,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   registeredEvents: {
+    width: "100%",
     borderRadius: 5,
     marginTop: 5,
     height: 60,
@@ -166,7 +204,8 @@ const styles = StyleSheet.create({
   eventBadges: {
     height: 50,
     width: 50,
-    backgroundColor: "white",
+    backgroundColor: "gray",
     marginHorizontal: 5,
+    borderRadius: 0,
   },
 });

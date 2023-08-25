@@ -1,10 +1,10 @@
-import { View, Text, BackHandler } from "react-native";
+import { View, Text, BackHandler, StyleSheet } from "react-native";
 import React, { useCallback } from "react";
 import { auth, db } from "../firebase";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useRoute } from "@react-navigation/core";
-import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { Timestamp, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import {
   Bubble,
   Composer,
@@ -14,10 +14,14 @@ import {
   MessageText,
   Send,
 } from "react-native-gifted-chat";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { IconButton, Avatar } from "react-native-paper";
 
-export default function ChatScreen() {
+export default function ChatScreen({ navigation }) {
   const route = useRoute();
   const chatID = route.params.chatId;
+  const targetUserName = route.params.targetUserName;
+  const targetUserImage = route.params.targetUserImage;
   const userID = auth.currentUser.uid;
 
   const [userProfileData, setUserProfileData] = useState({});
@@ -67,9 +71,7 @@ export default function ChatScreen() {
   }
 
   function renderSend(props) {
-    return (
-      <Send  {...props}  />
-    );
+    return <Send {...props} />;
   }
   renderBubble = (props) => {
     return (
@@ -87,24 +89,82 @@ export default function ChatScreen() {
     );
   };
 
+  const updateLastView = async () => {
+    const date = new Date();
+    const lastView = Timestamp.fromDate(date);
+    const chatRef = doc(db, "chats", chatID);
+    await updateDoc(chatRef, {
+      [userID]: lastView,
+    });
+  };
+
+  useEffect(() => {
+    const backAction = () => {
+      // Kullanıcı geri tuşuna bastığında veya uygulamadan çıktığında
+      // Firebase'e veriyi gönderme işlemini burada yapabilirsiniz.
+      updateLastView();
+       // false döndürerek geri tuşunun varsayılan işlevini sürdürebilirsiniz.
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove(); // Temizleme işlemi
+  }, []);
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#282A3A" }}>
-      <GiftedChat
-        renderSend={renderSend}
-        renderBubble={this.renderBubble}
-        renderInputToolbar={renderInputToolbar}
-        textInputProps={{ color: "white" }}
-        alwaysShowSend={true}
-        messages={messages.map((x) => ({
-          ...x,
-          createdAt: x.createdAt?.toDate(),
-        }))}
-        onSend={(messages) => onSend(messages)}
-        user={{
-          _id: userID,
-          avatar: userProfileData.storageProfileImageURL,
-        }}
-      />
-    </View>
+    <React.Fragment>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#282A3A" }}>
+        <View style={styles.header}>
+          <IconButton
+            icon="arrow-left"
+            iconColor="white"
+            size={20}
+            onPress={() => {
+              navigation.navigate("HomeScreen");
+              updateLastView();
+            }}
+          />
+          <Avatar.Image size={40} source={{ uri: targetUserImage }} />
+
+          <Text
+            style={{
+              color: "white",
+              fontSize: 22,
+              textAlign: "center",
+              padding: 7,
+              fontFamily: "Kanit",
+            }}
+          >
+            {targetUserName}
+          </Text>
+        </View>
+        <GiftedChat
+          renderSend={renderSend}
+          renderBubble={this.renderBubble}
+          renderInputToolbar={renderInputToolbar}
+          textInputProps={{ color: "white" }}
+          alwaysShowSend={true}
+          messages={messages.map((x) => ({
+            ...x,
+            createdAt: x.createdAt?.toDate(),
+          }))}
+          onSend={(messages) => onSend(messages)}
+          user={{
+            _id: userID,
+            avatar: userProfileData.storageProfileImageURL,
+          }}
+        />
+      </SafeAreaView>
+    </React.Fragment>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    padding: 5,
+  },
+});
