@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, BackHandler, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import ChatList from "./chat_list";
 import Profile from "./profile";
@@ -9,77 +9,73 @@ import { useTheme, Button } from "react-native-paper";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { useDispatch, useSelector } from "react-redux";
+import { onAuthStateChanged } from "firebase/auth";
+import { setAuthId } from "../redux/authentication";
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function HomeScreen({ navigation }) {
+
+
   const theme = useTheme();
   theme.colors.secondaryContainer = "transparent";
 
-const currentUID = auth.currentUser.uid;
-
-useEffect(()=>{
-  const x = async () =>{
-    const docRef = doc(db, "users", currentUID);
-    const docSnap = await getDoc(docRef);
-    if(docSnap.data().profileDetailsCreated){}
-    else{navigation.navigate('CreateProfile')} 
-  }
-  x();
-},[])
-
+  const msgCount = useSelector((state) => state.msgCounter.value);
 
   return (
-    <Tab.Navigator
-      style={{backgroundColor:'black'}}
-      initialRouteName="Search"
-      activeColor="#fff"
-      inactiveColor="#888888"
-      labeled={false}
-      barStyle={{
-        backgroundColor: "#282A3A",
-        height: 60,
-        borderTopWidth: 2,
-        borderTopColor: "gray",
-        shadowColor: "blue",
-      }}
-    >
-      <Tab.Screen
-        name="ChatList"
-        options={{
-          tabBarColor: "blue",
-          tabBarBadge: "2",
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="chat" color={color} size={26} />
-          ),
+    <>
+      <Tab.Navigator
+        style={{ backgroundColor: "black" }}
+        initialRouteName="Search"
+        activeColor="#fff"
+        inactiveColor="#888888"
+        labeled={false}
+        barStyle={{
+          backgroundColor: "#282A3A",
+          height: 60,
+          borderTopWidth: 2,
+          borderTopColor: "gray",
+          shadowColor: "blue",
         }}
-        component={ChatList}
-      />
+      >
+        <Tab.Screen
+          name="ChatList"
+          options={{
+            tabBarColor: "blue",
+            tabBarBadge: msgCount !== 0 ? msgCount : null,
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="chat" color={color} size={26} />
+            ),
+          }}
+          component={ChatList}
+        />
 
-      <Tab.Screen
-        name="Search"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons color={color} name="earth" size={26} />
-          ),
-        }}
-        component={Search}
-      />
+        <Tab.Screen
+          name="Search"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons color={color} name="earth" size={26} />
+            ),
+          }}
+          component={Search}
+        />
 
-      <Tab.Screen
-        name="Profile"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              color={color}
-              name="account-arrow-right"
-              size={26}
-            />
-          ),
-        }}
-        component={Profile}
-      />
-    </Tab.Navigator>
+        <Tab.Screen
+          name="Profile"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons
+                color={color}
+                name="account-arrow-right"
+                size={26}
+              />
+            ),
+          }}
+          component={Profile}
+        />
+      </Tab.Navigator>
+    </>
   );
 }
 const styles = StyleSheet.create({

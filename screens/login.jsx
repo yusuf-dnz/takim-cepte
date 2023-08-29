@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { BackHandler, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import {
   TextInput,
   Avatar,
@@ -12,10 +12,6 @@ import { auth, authState } from "../firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
 
-// const currentDate = new Date();
-// const timestamp = Timestamp.fromDate(currentDate);
-// console.log(timestamp);
-
 export default function LogIn({ navigation }) {
   // const theme = useTheme();
   // theme.colors.secondaryContainer = "blue";
@@ -25,6 +21,18 @@ export default function LogIn({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState("eye");
 
+  // useEffect(() => {
+  //   const backHandler = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     () => {
+  //       BackHandler.exitApp(); // Uygulamayı kapat
+  //       return true; // true döndürerek varsayılan geri tuşu işlevini engelle
+  //     }
+  //   );
+
+  //   return () => backHandler.remove(); // bileşen kaldırıldığında event listener'ı temizle
+  // }, []);
+
   const togglePasswordVisibility = () => {
     if (!showPassword) setPasswordIcon("eye-off");
     else setPasswordIcon("eye");
@@ -33,26 +41,9 @@ export default function LogIn({ navigation }) {
   };
 
   const handleLogIn = async () => {
-    const { user } = await signInWithEmailAndPassword(auth, email, password);
-    // console.log(JSON.stringify(user, null, 2))
-    navigation.navigate("HomeScreen");
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+
   };
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      console.log("auth state");
-      if (user) {
-        // setUserID(user.uid)
-
-        navigation.navigate("HomeScreen");
-
-        console.log("giriş yapılmış");
-      } else {
-        console.log("user yok");
-        // navigation.navigate('LogIn')
-      }
-    });
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -88,14 +79,17 @@ export default function LogIn({ navigation }) {
           />
 
           <Button
-            style={{ marginTop: 20, backgroundColor: "#0000ff44",borderRadius:5 }}
+            style={{
+              marginTop: 20,
+              backgroundColor: "#0000ff44",
+              borderRadius: 5,
+            }}
             mode="contained-tonal"
-            
             onPress={() => {
               handleLogIn(email, password);
             }}
           >
-            <Text style={{color:'white'}}>Giriş Yap</Text>
+            <Text style={{ color: "white" }}>Giriş Yap</Text>
           </Button>
 
           <Button
@@ -119,11 +113,11 @@ const styles = StyleSheet.create({
   },
 
   view: {
-    marginTop: '70%',
+    marginTop: "70%",
   },
 
   input: {
     backgroundColor: "transparent",
-    marginVertical:10,
+    marginVertical: 10,
   },
 });

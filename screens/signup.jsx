@@ -4,12 +4,11 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {  StyleSheet, Text, View } from "react-native";
 import { TextInput, Avatar, Button } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import { auth, db } from "../firebase";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc,  setDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore";
 
 export default function SignUp({ navigation }) {

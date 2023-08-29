@@ -5,6 +5,7 @@ import {
   ImageBackground,
   Dimensions,
   Image,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { auth, db, storage } from "../firebase";
@@ -22,20 +23,41 @@ import {
 import { signOut } from "firebase/auth";
 import { getDownloadURL, ref } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 
 export default function Profile({ navigation }) {
-  const userID = auth.currentUser.uid;
+  // const CurrentUser = useSelector((state) => state.authStatus.value);
+  const CurrentUser = auth.currentUser.uid// AUTH VERİSİ ID
 
-  const handleLogOut = async (e) => {
-    await signOut(auth);
-    console.log("çıkış yapıldı");
-    navigation.navigate("LogIn");
+
+
+  const handleLogOut = () => {
+
+
+    Alert.alert("Hesaptan çıkış yap...","", [
+      {
+        text: "Hayır",
+        onPress: () => null,
+        style: "cancel",
+      },
+      { text: "Evet", onPress: async (e) => 
+    {
+      await signOut(auth);
+      console.log("çıkış yapıldı");
+    }
+    
+    },
+    ]);
+
+
+
+    
   };
 
   const [userProfileData, setUserProfileData] = useState({});
   useEffect(() => {
     const getUserProfile = async () => {
-      const docRef = doc(db, "users", userID);
+      const docRef = doc(db, "users", CurrentUser);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -77,7 +99,6 @@ export default function Profile({ navigation }) {
     const docSnap = await getDoc(docRef);
     setEvents((prevData) => [...prevData, docSnap.data()]);
   };
-  console.log(events);
 
   return (
     <View style={{ backgroundColor: "#282A3A" }}>
@@ -154,16 +175,17 @@ export default function Profile({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 5,
-    width: Dimensions.get("window").width - 10,
-    height: Dimensions.get("window").width - 10, // Eğer dörtgen bir avatar isteniyorsa bu kısmı özelleştirebilirsiniz.
+    width: null,
+    height: null, 
     overflow: "hidden",
     backgroundColor: "transparent",
+alignItems:'center'
   },
   image: {
+    borderRadius:20,
     flex: 1,
-    width: null,
-    height: null,
+    width: 200,
+    height: 200, 
   },
   displayNameText: {
     fontFamily: "Kanit",

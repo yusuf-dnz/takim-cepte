@@ -27,6 +27,7 @@ import {
   or,
 } from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 
 export default function Search({ navigation }) {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -41,7 +42,6 @@ export default function Search({ navigation }) {
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
 
-  const currentUserID = auth.currentUser.uid;
 
   useEffect(() => {
     var eventArray = [];

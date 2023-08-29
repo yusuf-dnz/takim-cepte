@@ -30,9 +30,10 @@ import { getDownloadURL, ref } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/core";
 import { BorderlessButton } from "react-native-gesture-handler";
+import { useSelector } from "react-redux";
 
 export default function VisitProfile({ navigation }) {
-  const currentUserID = auth.currentUser.uid;
+  const CurrentUser = useSelector((state) => state.authStatus.value);
 
   const route = useRoute();
   const targetUserData = route.params.targetUserData;
@@ -44,23 +45,31 @@ export default function VisitProfile({ navigation }) {
     const docRef = query(
       collection(db, "chats"),
       or(
-        where("participants", "==", [targetID, currentUserID]),
-        where("participants", "==", [currentUserID, targetID])
+        where("participants", "==", [targetID, CurrentUser]),
+        where("participants", "==", [CurrentUser, targetID])
       )
     );
     const querySnapshot = await getDocs(docRef);
     if (querySnapshot.empty) {
       const create = await addDoc(collection(db, "chats"), {
-        participants: [currentUserID, targetID],
-        [currentUserID]: lastView,
+        participants: [CurrentUser, targetID],
+        [CurrentUser]: lastView,
         [targetID]: lastView,
       });
       // console.log(create.id)
       console.log("chat oluşturuldu");
-      navigation.navigate("ChatScreen", { chatId: create.id });
+      navigation.navigate("ChatScreen", {
+        chatId: create.id,
+        targetUserName: targetUserData.displayName,
+        targetUserImage: targetUserData.storageProfileImageURL,
+      });
     } else {
       console.log(querySnapshot.docs[0].id);
-      navigation.navigate("ChatScreen", { chatId: querySnapshot.docs[0].id });
+      navigation.navigate("ChatScreen", {
+        chatId: querySnapshot.docs[0].id,
+        targetUserName: targetUserData.displayName,
+        targetUserImage: targetUserData.storageProfileImageURL,
+      });
     }
   };
 

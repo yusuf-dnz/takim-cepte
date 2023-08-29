@@ -30,12 +30,17 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch } from "react-redux";
+import { updateMsgCounter } from "../redux/messageCounter";
 
 export default function ChatList({ navigation }) {
-  const currentUserID = auth.currentUser.uid;
+  const currentUserID = auth.currentUser.uid; // AUTH VERİSİ ID
   const [chats, setChats] = useState([]);
   const [onSnap, setOnSnap] = useState([]);
-  const [totalUnRead, setTotalUnRead] = useState(0);
+
+  let totalUnRead = 0;
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const docRef = query(
       collection(db, "chats"),
@@ -44,8 +49,6 @@ export default function ChatList({ navigation }) {
     const unsub = onSnapshot(docRef, (querySnapshot) => {
       console.log("ONSNAP ÇALIŞTI");
       setChats([]);
-      setTotalUnRead(0);
-
       setOnSnap(querySnapshot.docs);
     });
     return () => {
@@ -54,9 +57,7 @@ export default function ChatList({ navigation }) {
   }, []);
 
   useEffect(() => {
-    setChats([]);
-    setTotalUnRead(0);
-
+    totalUnRead = 0;
     onSnap.map((doc) => {
       let targetUser;
       const chatData = doc;
@@ -67,9 +68,8 @@ export default function ChatList({ navigation }) {
 
       createTargetChats(chatData, targetUser);
     });
-
+    dispatch(updateMsgCounter(totalUnRead));
   }, [onSnap]);
-  console.log(totalUnRead)
 
   const createTargetChats = async (x, y) => {
     let unreadCounter = 0;
@@ -93,7 +93,7 @@ export default function ChatList({ navigation }) {
         unreadCounter++; // timestamp2 daha yeni
       }
     });
-    setTotalUnRead(totalUnRead + unreadCounter);
+    totalUnRead = totalUnRead + unreadCounter;
 
     const docRef = doc(db, "users", y);
     const docSnap = await getDoc(docRef);

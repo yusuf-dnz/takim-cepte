@@ -32,8 +32,6 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { SegmentedButtons, Button } from "react-native-paper";
 import axios from "axios";
 
-console.log("CREATE PROFILE");
-
 export const uriToBlob = (uri) => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -238,7 +236,6 @@ export default function CreateProfile({ navigation }) {
 
       axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data, null, 2));
           setCitiesData(response.data);
         })
         .catch(function (error) {
@@ -363,7 +360,6 @@ export default function CreateProfile({ navigation }) {
         const userNames = collection(db, "users");
         const q = query(userNames, where("userName", "==", newValue));
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot.empty);
         if (querySnapshot.empty) {
           setNameIcon({
             availableName: true,
