@@ -10,8 +10,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { auth, db } from "../firebase";
 import { doc,  setDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore";
+import { useContext } from "react";
+import { ThemeContext } from "../Theme";
 
 export default function SignUp({ navigation }) {
+  const Theme = useContext(ThemeContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRepeatPassword] = useState("");
@@ -48,6 +52,7 @@ export default function SignUp({ navigation }) {
         userId: user.uid,
         profileDetailsCreated: false,
         createdDate: createdDate,
+        registeredEvents: [],
       });
 
       onAuthStateChanged(auth, (user) => {
@@ -66,35 +71,52 @@ export default function SignUp({ navigation }) {
     return;
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Theme.backgroundColor,
+      paddingHorizontal: 20,
+    },
+  
+    view: {
+      marginTop: "50%",
+    },
+  
+    input: {
+      backgroundColor: "transparent",
+      marginVertical: 10,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <SafeAreaProvider>
         <View style={styles.view}>
           <TextInput
             style={styles.input}
-            textColor="#eeeeee"
-            activeUnderlineColor="white"
-            underlineColor="white"
-            label={<Text style={{ color: "#eeeeee" }}>Display Name</Text>}
+            textColor={Theme.color}
+            activeUnderlineColor={Theme.color}
+            underlineColor={Theme.color}
+            label={<Text style={{ color: Theme.color }}>Display Name</Text>}
             value={displayName}
             onChangeText={(text) => setDisplayName(text)}
           />
           <TextInput
             style={styles.input}
-            label={<Text style={{ color: "#eeeeee" }}>Email</Text>}
+            label={<Text style={{ color: Theme.color }}>Email</Text>}
             value={email}
-            textColor="#eeeeee"
-            underlineColor="white"
-            activeUnderlineColor="white"
+            textColor={Theme.color}
+            underlineColor={Theme.color}
+            activeUnderlineColor={Theme.color}
             onChangeText={(text) => setEmail(text)}
           />
 
           <TextInput
             style={styles.input}
-            textColor="#eeeeee"
-            activeUnderlineColor="white"
-            underlineColor="white"
-            label={<Text style={{ color: "#eeeeee" }}>Password</Text>}
+            textColor={Theme.color}
+            activeUnderlineColor={Theme.color}
+            underlineColor={Theme.color}
+            label={<Text style={{ color: Theme.color }}>Password</Text>}
             secureTextEntry={!showPassword}
             onChangeText={(text) => setPassword(text)}
             value={password}
@@ -102,11 +124,11 @@ export default function SignUp({ navigation }) {
 
           <TextInput
             style={styles.input}
-            textColor="#eeeeee"
-            activeUnderlineColor="white"
-            underlineColor="white"
+            textColor={Theme.color}
+            activeUnderlineColor={Theme.color}
+            underlineColor={Theme.color}
             label={
-              <Text style={{ color: "#eeeeee" }}>Repeat the password</Text>
+              <Text style={{ color: Theme.color }}>Repeat the password</Text>
             }
             value={rePassword}
             onChangeText={(text) => setRepeatPassword(text)}
@@ -116,7 +138,7 @@ export default function SignUp({ navigation }) {
               <TextInput.Icon
                 id="password-icon"
                 icon={passwordIcon}
-                color="white"
+                color={Theme.color}
                 onPress={togglePasswordVisibility}
               />
             }
@@ -133,7 +155,7 @@ export default function SignUp({ navigation }) {
               handleSignUp();
             }}
           >
-            <Text style={{ color: "white" }}>Kayıt Ol</Text>
+            <Text style={{ color: Theme.color }}>Kayıt Ol</Text>
           </Button>
 
           <Button
@@ -144,7 +166,7 @@ export default function SignUp({ navigation }) {
             }}
             onPress={() => navigation.navigate("LogIn")}
           >
-            <Text style={{ color: "white" }}>Giriş Yap</Text>
+            <Text style={{ color: Theme.color }}>Giriş Yap</Text>
           </Button>
         </View>
       </SafeAreaProvider>
@@ -152,19 +174,4 @@ export default function SignUp({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#282A3A",
-    paddingHorizontal: 20,
-  },
 
-  view: {
-    marginTop: "50%",
-  },
-
-  input: {
-    backgroundColor: "transparent",
-    marginVertical: 10,
-  },
-});

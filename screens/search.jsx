@@ -4,14 +4,21 @@ import {
   ScrollView,
   ImageBackground,
   Dimensions,
-  
   Image,
   ImageComponent,
   StyleSheet,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Avatar, Card, Divider, IconButton, List ,Button, } from "react-native-paper";
+import {
+  Avatar,
+  Card,
+  Divider,
+  IconButton,
+  List,
+  Button,
+} from "react-native-paper";
 import { auth, db } from "../firebase";
 import StaticTopBar from "../components/StaticTopBar";
 import {
@@ -28,8 +35,14 @@ import {
 } from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
+import ParticipantsPage from "./participants_page";
+import { ThemeContext } from "../Theme";
+import { useContext } from "react";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Search({ navigation }) {
+  const Theme = useContext(ThemeContext);
+
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = React.useCallback(() => {
@@ -40,13 +53,13 @@ export default function Search({ navigation }) {
   }, []);
 
   const [events, setEvents] = useState([]);
-  const [users, setUsers] = useState([]);
 
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     var eventArray = [];
     const eventLister = async () => {
-      console.log("event yenilendi")
+      console.log("event yenilendi");
       const querySnapshot = await getDocs(collection(db, "events"));
       querySnapshot.forEach((doc) => {
         eventArray.push(doc.data());
@@ -57,125 +70,107 @@ export default function Search({ navigation }) {
     eventLister();
   }, [refreshing]);
 
-  useEffect(() => {
-    var userArray = [];
-    const userLister = async () => {
-      console.log("users yenilendi")
+  const clearEvent = () => {
+    setSelectedEvent(null);
+  };
 
-      const querySnapshot = await getDocs(collection(db, "users"));
-      querySnapshot.forEach((doc) => {
-        userArray.push(doc.data());
-      });
-
-      setUsers([...userArray]);
-    };
-
-    userLister();
-  }, [refreshing]);
-
- 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    eventCard: {
+      marginVertical: 5,
+      marginHorizontal: 10,
+      borderRadius: 20,
+      backgroundColor: Theme.cardShadow,
+      shadowColor: Theme.cardShadow,
+      shadowOffset: {
+        width: 2,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    cardTitle: {
+      zIndex: 1,
+      color: Theme.color,
+      fontWeight: "bold",
+      fontSize: 20,
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
+      paddingLeft: 10,
+    },
+    cardCover: {
+      height: "100%",
+      height: 160,
+      overflow: "hidden",
+      backgroundColor: "transparent",
+      borderRadius: 10,
+    },
+    linearGradient: {
+      flex: 1,
+      zIndex:1,
+      height:null,
+      marginBottom:-27,
+      borderTopLeftRadius:5,
+      borderTopRightRadius:5,
+      
+    },
+  });
 
   return (
-    <View style={{backgroundColor:'#282A3A'}}>
+    <View style={{ backgroundColor: Theme.backgroundColor }}>
       <SafeAreaView>
-        <StaticTopBar text={"COMMUNITY"} />
-        <ScrollView
-          style={{height:'100%'}}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          <View style={{ flex: 1, marginBottom: 100 }}>
-            <View>
+        <StaticTopBar text={"Topluluk"} />
+        {selectedEvent == null ? (
+          <ScrollView
+            style={{ height: "100%" }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
+            <View style={{ flex: 1, marginBottom: 100 }}>
               {events.map((event, index) => (
                 <React.Fragment key={index}>
-                  <View
-                    style={{
-                      marginVertical: 7,
-                      marginHorizontal: 16,
-                      borderRadius: 20,
-                      backgroundColor:'blue',
-                      shadowColor: "blue", 
-                      shadowOffset: {
-                        width: 2,
-                        height: 2,
-                      }, 
-                      shadowOpacity: 0.25, 
-                      shadowRadius: 3.84, 
-                      elevation: 5, 
-                    }}
-                  >
-                    <Text
-                      style={{
-                        zIndex: 1,
-                        color: "#eeeeee",
-                        fontWeight: "bold",
-                        fontSize: 20,
-                        backgroundColor: "rgba(0, 0, 0, 0.6)",
-                        marginBottom: -25,
-                        borderTopLeftRadius: 10,
-                        borderTopRightRadius: 10,
-                        paddingLeft: 10,
-                      }}
+                  <View style={styles.eventCard}>
+                    <Pressable
+                      onPress={() => setSelectedEvent(event.eventTitle)}
                     >
-                      {event.eventTitle}{" "}
-                    </Text>
 
-                    <Card.Cover
-                      source={{ uri: event.eventImageURL }}
-                      style={{
-                        height: "100%",
-                        height: 160,
-                        overflow: "hidden",
-                        backgroundColor: "transparent",
-                        borderRadius: 10,
-                      }}
-                    />
+                      <LinearGradient
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        colors={["#38a3a5", "#0000ff33", "transparent"]}
+                        style={styles.linearGradient}
+                      >
+                      <Text style={styles.cardTitle}>{event.eventTitle} </Text>
+
+                      </LinearGradient>
+
+                      <Card.Cover
+                        source={{ uri: event.eventImageURL }}
+                        style={styles.cardCover}
+                      />
+                    </Pressable>
                   </View>
                 </React.Fragment>
               ))}
             </View>
-            <View>
-              {users.map((user, index) => (
-                <React.Fragment key={index}>
-                  <List.Item
-                    style={{ paddingHorizontal: 10 }}
-                    title={user.displayName}
-                    titleStyle={{color:'#eeeeee'}}
-                    description={user.userDescription}
-                    descriptionStyle={{color:'#eeeeee'}}
-                    left={() => (
-                      <Avatar.Image
-                        size={64}
-                        style={{}}
-                        source={{ uri: user.storageProfileImageURL??'https://firebasestorage.googleapis.com/v0/b/takimcepte.appspot.com/o/UserAvatars%2Fdefault.jpg?alt=media&token=30eeda7b-2ffc-472c-a5be-4ede8b28cf0b' }}
-                      />
-                    )}
-                    onPress={() =>
-                      navigation.navigate("VisitProfile", {
-                        targetUserData: user,
-                      })
-                    }
-                    
-                  />
-                </React.Fragment>
-              ))}
-            </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
+        ) : (
+          <ParticipantsPage
+            navigation={navigation}
+            selectedEvent={selectedEvent}
+            clearEvent={clearEvent}
+          />
+        )}
       </SafeAreaView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: 'pink',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

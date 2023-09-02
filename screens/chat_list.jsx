@@ -32,11 +32,16 @@ import { auth, db } from "../firebase";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
 import { updateMsgCounter } from "../redux/messageCounter";
+import { useContext } from "react";
+import { ThemeContext } from "../Theme";
 
 export default function ChatList({ navigation }) {
   const currentUserID = auth.currentUser.uid; // AUTH VERİSİ ID
   const [chats, setChats] = useState([]);
   const [onSnap, setOnSnap] = useState([]);
+
+  const Theme = useContext(ThemeContext);
+
 
   let totalUnRead = 0;
   const dispatch = useDispatch();
@@ -122,21 +127,23 @@ export default function ChatList({ navigation }) {
   };
 
   return (
-    <View style={{ backgroundColor: "#282A3A" }}>
-      <SafeAreaView style={{ backgroundColor: "#282A3A", minHeight: "100%" }}>
-        <StaticTopBar text={"CHATS"} />
+    <View style={{}}>
+      <SafeAreaView style={{ backgroundColor: Theme.backgroundColor, minHeight: "100%" }}>
+        <StaticTopBar text={"Konuşmalar"} />
 
         <ScrollView>
-          <View style={{ flex: 1, marginHorizontal: 10 }}>
+          <View style={{ flex: 1, marginHorizontal: 10 , marginBottom:50 }}>
             {chats.map((chat, index) => (
               <React.Fragment key={index}>
                 <List.Item
+                  style={{backgroundColor:Theme.component,borderRadius:5,marginVertical:5}}
                   title={chat.targetUserName}
-                  titleStyle={{ color: "#EEEEEE" }}
+                  titleStyle={{ color: Theme.color }}
                   description={(chat.messages ?? [])[0]?.text ?? undefined}
-                  descriptionStyle={{ color: "#EEEEEE" }}
+                  descriptionStyle={{ color: Theme.color }}
                   left={() => (
                     <Avatar.Image
+                      style={{marginLeft:5}}
                       size={56}
                       source={{ uri: chat.targetUserImage }}
                     />
@@ -157,7 +164,6 @@ export default function ChatList({ navigation }) {
                     updateLastView(chat.chatID);
                   }}
                 />
-                <Divider />
               </React.Fragment>
             ))}
           </View>

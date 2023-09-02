@@ -31,6 +31,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { SegmentedButtons, Button } from "react-native-paper";
 import axios from "axios";
+import { ThemeContext } from "../Theme";
+import { useContext } from "react";
 
 export const uriToBlob = (uri) => {
   return new Promise((resolve, reject) => {
@@ -50,6 +52,9 @@ export const uriToBlob = (uri) => {
 };
 
 export default function CreateProfile({ navigation }) {
+  const Theme = useContext(ThemeContext);
+
+
   const [countrysData, setCountrysData] = useState([]);
   const [statesData, setStatesData] = useState([]);
   const [citiesData, setCitiesData] = useState([]);
@@ -377,9 +382,78 @@ export default function CreateProfile({ navigation }) {
     }
   };
 
+  const styles = StyleSheet.create({
+    genderButtonText: {
+      color: Theme.softColor,
+      fontSize: 18,
+      padding: 5,
+    },
+  
+    regionText: {
+      backgroundColor: "transparent",
+      maxWidth: 100,
+      height: 40,
+      borderRadius: 5,
+    },
+    container: {
+      borderRadius: 5,
+      width: "100%",
+      height: Dimensions.get("window").width - 20,
+      overflow: "hidden",
+      backgroundColor: "#00000095",
+    },
+    image: {
+      flex: 1,
+      width: null,
+      height: null,
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 22,
+    },
+    modalView: {
+      margin: 20,
+      backgroundColor: Theme.backgroundColor,
+      borderRadius: 5,
+      padding: 35,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    button: {
+      padding: 10,
+      elevation: 2,
+    },
+  
+    buttonClose: {
+      backgroundColor: "gray",
+    },
+    textStyle: {
+      color: Theme.color,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    modalText: {
+      marginBottom: 15,
+    },
+    datePickerTexts: {
+      textAlign: "center",
+      width: 80,
+      fontWeight: "bold",
+      fontSize: 20,
+    },
+  });
+
   return (
     <View>
-      <SafeAreaView style={{ backgroundColor: "#282A3A", height: "100%" }}>
+      <SafeAreaView style={{ backgroundColor: Theme.backgroundColor, height: "100%" }}>
         <StaticTopBar text={"Profilini Oluştur"} />
 
         <ScrollView style={{ padding: 10 }}>
@@ -409,7 +483,7 @@ export default function CreateProfile({ navigation }) {
             <Text
               style={{
                 fontFamily: "CabinRegular",
-                color: "#eeeeee",
+                color: Theme.color,
                 fontSize: 25,
               }}
             >
@@ -421,7 +495,7 @@ export default function CreateProfile({ navigation }) {
                 height: 40,
                 borderBottomWidth: 1,
                 paddingHorizontal: 5,
-                color: "#eeeeee",
+                color: Theme.color,
                 fontFamily: "CabinRegular",
                 fontSize: 20,
               }}
@@ -441,7 +515,7 @@ export default function CreateProfile({ navigation }) {
 
           <View
             style={{
-              backgroundColor: "#001C30",
+              backgroundColor: Theme.component,
               borderBottomColor: "#000000",
               minHeight: 150,
               borderRadius: 5,
@@ -455,7 +529,7 @@ export default function CreateProfile({ navigation }) {
               maxLength={400}
               onChangeText={(text) => onChangeDescription(text)}
               value={description}
-              style={{ padding: 10, color: "#eeeeee" }}
+              style={{ padding: 10, color: Theme.color }}
             />
           </View>
 
@@ -463,7 +537,7 @@ export default function CreateProfile({ navigation }) {
             style={{
               marginTop: 5,
               padding: 10,
-              backgroundColor: "#001C30",
+              backgroundColor: Theme.component,
               borderRadius: 5,
             }}
             onPress={() => showDatepicker()}
@@ -475,7 +549,7 @@ export default function CreateProfile({ navigation }) {
             >
               <Text
                 style={{
-                  color: "#eeeeee66",
+                  color: Theme.softColor,
                   fontSize: 20,
                   textAlign: "center",
                 }}
@@ -488,7 +562,7 @@ export default function CreateProfile({ navigation }) {
           <View
             style={{
               marginTop: 5,
-              backgroundColor: "#001C30",
+              backgroundColor: Theme.backgroundColor,
               borderRadius: 5,
               padding: 10,
               alignItems: "center",
@@ -503,28 +577,27 @@ export default function CreateProfile({ navigation }) {
             >
               <Button
                 rippleColor="white"
-                textColor="#eeeeee66"
+                textColor={Theme.softColor}
                 onPress={() => countrysLister()}
                 style={styles.regionText}
               >
                 {country?.name ?? "Ülke"}
               </Button>
-              <Text style={{ fontSize: 25, color: "#eeeeee66" }}>/ </Text>
+              <Text style={{ fontSize: 25, color: Theme.softColor }}>/ </Text>
 
               <Button
                 rippleColor="white"
-                textColor="#eeeeee66"
-                eeeeee66
+                textColor={Theme.softColor}
                 onPress={() => statesLister()}
                 style={styles.regionText}
               >
                 {state?.name ?? "Şehir"}
               </Button>
-              <Text style={{ fontSize: 25, color: "#eeeeee66" }}>/ </Text>
+              <Text style={{ fontSize: 25, color: Theme.softColor }}>/ </Text>
 
               <Button
                 rippleColor="white"
-                textColor="#eeeeee66"
+                textColor={Theme.softColor}
                 onPress={() => citiesLister()}
                 style={styles.regionText}
               >
@@ -542,7 +615,7 @@ export default function CreateProfile({ navigation }) {
             }}
           >
             <SegmentedButtons
-              style={{ borderRadius: 20, backgroundColor: "#001C30" }}
+              style={{ borderRadius: 20, backgroundColor: Theme.component }}
               value={gender}
               onValueChange={setGender}
               buttons={[
@@ -607,71 +680,4 @@ export default function CreateProfile({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  genderButtonText: {
-    color: "#eeeeeeaa",
-    fontSize: 18,
-    padding: 5,
-  },
 
-  regionText: {
-    backgroundColor: "transparent",
-    maxWidth: 100,
-    height: 40,
-    borderRadius: 5,
-  },
-  container: {
-    borderRadius: 5,
-    width: "100%",
-    height: Dimensions.get("window").width - 20,
-    overflow: "hidden",
-    backgroundColor: "#00000095",
-  },
-  image: {
-    flex: 1,
-    width: null,
-    height: null,
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "#282A3A",
-    borderRadius: 5,
-    padding: 35,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    padding: 10,
-    elevation: 2,
-  },
-
-  buttonClose: {
-    backgroundColor: "gray",
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  modalText: {
-    marginBottom: 15,
-  },
-  datePickerTexts: {
-    textAlign: "center",
-    width: 80,
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-});

@@ -31,12 +31,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/core";
 import { BorderlessButton } from "react-native-gesture-handler";
 import { useSelector } from "react-redux";
+import { useContext } from "react";
+import { ThemeContext } from "../Theme";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function VisitProfile({ navigation }) {
-  const CurrentUser = useSelector((state) => state.authStatus.value);
+  const Theme = useContext(ThemeContext);
 
+  const CurrentUser = useSelector((state) => state.authStatus.userData.userId);
   const route = useRoute();
   const targetUserData = route.params.targetUserData;
+
 
   const createChat = async (targetID) => {
     const date = new Date();
@@ -88,97 +93,169 @@ export default function VisitProfile({ navigation }) {
   // Tarihi istenen formata dönüştürme
   const formattedDate = date.toLocaleDateString("tr-TR", options);
 
-  return (
-    <SafeAreaView style={{ backgroundColor: "#282A3A" }}>
-      <StaticTopBar text={"PROFILE"} />
+  const [events, setEvents] = useState([]);
 
+  useEffect(() => {
+    const eventArray = targetUserData?.registeredEvents ?? [];
+
+    setEvents([]);
+
+    const regEvent = async () => {
+      if (eventArray.length > 0) {
+        const eventRef = collection(db, "events");
+        const q = query(eventRef, where("eventTitle", "in", eventArray));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          setEvents((prevData) => [...prevData, doc.data()]);
+        });
+      } else {
+        console.log("event boş");
+      }
+    };
+    regEvent();
+  }, []);
+
+  const styles = StyleSheet.create({
+    container: {
+      width: null,
+      height: Dimensions.get("window").width / 2,
+      overflow: "hidden",
+      backgroundColor: "transparent",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginVertical: 5,
+    },
+    detailsView: {
+      padding: 10,
+      borderRadius: 20,
+      width: "49%",
+      height: null,
+      justifyContent: "center",
+      backgroundColor: Theme.component,
+    },
+    image: {
+      borderRadius: 20,
+      width: "49%",
+      height: null,
+    },
+    displayNameText: {
+      color: Theme.color,
+      fontSize: 20,
+      marginBottom: 5,
+    },
+    detailTexts: {
+      color: Theme.softColor,
+      marginBottom: 5,
+      fontSize: 12,
+    },
+    registeredEvents: {
+      width: "100%",
+      borderRadius: 5,
+      height: 60,
+      padding: 5,
+      flexDirection: "row",
+      backgroundColor: Theme.component,
+      marginBottom: 5,
+    },
+  });
+
+  return (
+    <SafeAreaView>
       <ScrollView
-        style={{ backgroundColor: "#282A3A", height: "100%", padding: 5 }}
+        style={{
+          backgroundColor: Theme.backgroundColor,
+          height: "100%",
+          padding: 5,
+        }}
       >
-        {/* <Avatar.Image size={Dimensions.get('window').width} style={{borderRadius:0,backgroundColor:'transparent'}} source={require('../assets/ism.png') } /> */}
         <View style={styles.container}>
           <Image
             source={{ uri: targetUserData.storageProfileImageURL }}
             style={styles.image}
             resizeMode="cover"
           />
+          <View style={styles.detailsView}>
+            <View style={{ height: "70%" }}>
+              <Text style={styles.displayNameText}>
+                {targetUserData.displayName}
+              </Text>
+              <Text style={styles.detailTexts}>@{targetUserData.userName}</Text>
+              {/* <Text style={styles.detailTexts}>
+                Katılım: {formattedDate}
+              </Text> */}
+              <Text style={styles.detailTexts}>
+                {targetUserData.country} / {targetUserData.state} /{" "}
+                {targetUserData.cities ?? "..."}
+              </Text>
+            </View>
+            <View
+              style={{
+                alignItems: "flex-end",
+                marginRight: 10,
+                zIndex: 2,
+              }}
+            >
+              <IconButton
+                icon="chat"
+                iconColor="white"
+                size={35}
+                style={{
+                  backgroundColor: "red",
+                  borderRadius: 10,
+                  alignItems: "center",
+                }}
+                onPress={() => createChat(targetUserData.userId)}
+              />
+            </View>
+          </View>
         </View>
 
-        <View
-          style={{
-            alignItems: "flex-end",
-            marginTop: -50,
-            marginBottom: 0,
-            marginRight: 30,
-          }}
-        >
-          <IconButton
-            icon="chat"
-            iconColor="white"
-            size={40}
-            style={{
-              backgroundColor: "red",
-              borderRadius: 10,
-              alignItems: "center",
-            }}
-            onPress={() => createChat(targetUserData.userId)}
+        {/* <View style={styles.container}>
+          <Image
+            source={{ uri: targetUserData.storageProfileImageURL }}
+            style={styles.image}
+            resizeMode="cover"
           />
-        </View>
-
-        <Text style={styles.displayNameText}>{targetUserData.displayName}</Text>
+          
+        </View> */}
 
         {/* Açıklama alanı */}
         <View
           style={{
-            paddingHorizontal: 10,
-            backgroundColor: "#001C30",
+            padding: 10,
+            backgroundColor: Theme.component,
             borderRadius: 5,
-            minHeight: 150,
+            minHeight: 100,
+            marginBottom: 5,
+
           }}
         >
-          <Text
-            style={{
-              color: "#eeeeee",
-              fontSize: 16,
-              fontFamily: "CabinRegular",
-            }}
-          >
-            @{targetUserData.userName}
-          </Text>
-
-          <Text style={{ color: "white", marginTop: 5 }}>
-            {targetUserData.userDescription}
+          <Text style={{ color: Theme.color, marginTop: 5 }}>
+            {targetUserData.userDescription
+              ? targetUserData.userDescription
+              : "..."}
           </Text>
         </View>
 
-        <Text style={{ textAlign: "right", color: "#eeeeee", margin: 10 }}>
+        <View style={styles.registeredEvents}>
+          <ScrollView horizontal={true}>
+            {events?.map((event, index) => (
+              <React.Fragment key={index}>
+                <Image
+                  style={{ width: 50, marginHorizontal: 5 }}
+                  source={{
+                    uri: event.eventIconURL,
+                  }}
+                />
+              </React.Fragment>
+            ))}
+          </ScrollView>
+        </View>
+
+        <Text style={{ textAlign: "right", color: Theme.color, margin: 10 }}>
           Katılım: {formattedDate}
         </Text>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 5,
-    width: Dimensions.get("window").width - 10,
-    height: Dimensions.get("window").width - 10, // Eğer dörtgen bir avatar isteniyorsa bu kısmı özelleştirebilirsiniz.
-    overflow: "hidden",
-    backgroundColor: "transparent",
-  },
-  image: {
-    flex: 1,
-    width: null,
-    height: null,
-  },
-  displayNameText: {
-    fontFamily: "Kanit",
-
-    color: "#eeeeee",
-    fontSize: 20,
-    marginVertical: 5,
-    paddingLeft: 10,
-    marginTop: -20,
-  },
-});

@@ -16,8 +16,12 @@ import {
 } from "react-native-gifted-chat";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton, Avatar } from "react-native-paper";
+import { useContext } from "react";
+import { ThemeContext } from "../Theme";
 
 export default function ChatScreen({ navigation }) {
+  const Theme = useContext(ThemeContext);
+
   const route = useRoute();
   const chatID = route.params.chatId;
   const targetUserName = route.params.targetUserName;
@@ -64,14 +68,23 @@ export default function ChatScreen({ navigation }) {
         optionTintColor={{}}
         containerStyle={{
           backgroundColor: "#00000055",
-          borderTopColor: "#E8E8E8",
+          borderTopColor: "red",
         }}
       />
     );
   }
 
   function renderSend(props) {
-    return <Send {...props} />;
+    return <Send {...props} label={"    "} 
+    sendButtonProps={{
+      style:{
+        backgroundColor:Theme.senderBubble,
+        margin:5,
+        marginRight:10,
+        borderRadius:20,
+      }
+    }}
+    />;
   }
   renderBubble = (props) => {
     return (
@@ -79,10 +92,10 @@ export default function ChatScreen({ navigation }) {
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: "#4455ff99", // Change this color for sent messages
+            backgroundColor: Theme.senderBubble, // Change this color for sent messages
           },
           left: {
-            backgroundColor: "white", // Change this color for received messages
+            backgroundColor: Theme.receiverBubble, // Change this color for received messages
           },
         }}
       />
@@ -114,9 +127,18 @@ export default function ChatScreen({ navigation }) {
     return () => backHandler.remove(); // Temizleme işlemi
   }, []);
 
+  const styles = StyleSheet.create({
+    header: {
+      flexDirection: "row",
+      marginTop:4,
+      borderBottomWidth:0.5,
+      borderBottomColor:'red'
+    },
+  });
+
   return (
     <React.Fragment>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#282A3A" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: Theme.backgroundColor }}>
         <View style={styles.header}>
           <IconButton
             icon="arrow-left"
@@ -131,11 +153,10 @@ export default function ChatScreen({ navigation }) {
 
           <Text
             style={{
-              color: "white",
+              color: Theme.color,
               fontSize: 22,
               textAlign: "center",
               padding: 7,
-              fontFamily: "Kanit",
             }}
           >
             {targetUserName}
@@ -162,9 +183,4 @@ export default function ChatScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    padding: 5,
-  },
-});
+

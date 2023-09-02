@@ -6,6 +6,7 @@ import HomeScreen from "./screens/home";
 import ChatScreen from "./screens/chat_screen";
 import VisitProfile from "./screens/visit_profile";
 import CreateProfile from "./screens/create_profile";
+import ParticipantsPage from "./screens/participants_page";
 
 import { View, Text, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,28 +17,28 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { setAuthId, setUserData } from "./redux/authentication";
 import { doc, getDoc } from "firebase/firestore";
+import { ThemeContext } from "./Theme";
+import { useContext } from "react";
 
 const Stack = createStackNavigator();
 
 export default function Main() {
+  const Theme = useContext(ThemeContext);
+
   const [userDoc, setUserDoc] = useState(null);
 
-  const CurrentUser = useSelector((state) => state.authStatus.value);
-  const user = useSelector((state) => state.authStatus.userData);
-  
-  console.log(user);
+  const CurrentUser = useSelector((state) => state.authStatus.userData);
+
+  // console.log(user);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        dispatch(setAuthId(auth.currentUser.uid));
-        // dispatch(setUserData(JSON.stringify(auth.currentUser)));
-
         x(auth.currentUser.uid);
       } else {
-        dispatch(setAuthId(null));
+        dispatch(setUserData(null));
       }
     });
   }, []);
@@ -48,24 +49,23 @@ export default function Main() {
     setUserDoc(docSnap.data());
   };
   useEffect(() => {
-    // console.log(userDoc.userId)
     dispatch(setUserData(JSON.stringify(userDoc)));
   }, [userDoc]);
 
-  //   dispatch(setUserData(JSON.stringify(userDoc)));
-  ///////////// /////////////////////////////
-  // const x = async (id) => {
-  //   const docRef = doc(db, "users", id);
-  //   const docSnap = await getDoc(docRef);
-  // //   setUserDoc(docSnap.data());
-  // };
-  // x();
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "black",
+      height: "100%",
+    },
+  });
 
   return (
     <View style={styles.container}>
-      <NavigationContainer>
-        <Stack.Navigator>
-          {!CurrentUser ? ( // Eğer kullanıcı oturum açmamışsa
+      <NavigationContainer theme={{ colors: { background: Theme.backgroundColor } }}>
+        <Stack.Navigator 
+        >
+          {!CurrentUser ? (
             <>
               <Stack.Screen
                 name="LogIn"
@@ -101,6 +101,11 @@ export default function Main() {
                 component={CreateProfile}
                 options={{ headerShown: false }}
               />
+              <Stack.Screen
+                name="ParticipantsPage"
+                component={ParticipantsPage}
+                options={{ headerShown: false }}
+              />
             </>
           )}
         </Stack.Navigator>
@@ -109,10 +114,4 @@ export default function Main() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#282A3A",
-    height: "100%",
-  },
-});
+

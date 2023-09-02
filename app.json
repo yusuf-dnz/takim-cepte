@@ -16,21 +16,24 @@
     ],
     "ios": {
       "userInterfaceStyle": "dark",
-
       "supportsTablet": true
     },
     "android": {
       "userInterfaceStyle": "dark",
-
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.yuefi.TakimCepte"
     },
     "web": {
       "userInterfaceStyle": "dark",
-
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2cf166c3-8f10-40fb-9528-105185726677"
+      }
     }
   }
 }

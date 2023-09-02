@@ -11,8 +11,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { auth, authState } from "../firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
+import { ThemeContext } from "../Theme";
+import { useContext } from "react";
 
 export default function LogIn({ navigation }) {
+  const Theme = useContext(ThemeContext);
+
   // const theme = useTheme();
   // theme.colors.secondaryContainer = "blue";
 
@@ -45,13 +49,30 @@ export default function LogIn({ navigation }) {
 
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Theme.backgroundColor,
+      paddingHorizontal: 20,
+    },
+  
+    view: {
+      marginTop: "70%",
+    },
+  
+    input: {
+      backgroundColor: "transparent",
+      marginVertical: 10,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <SafeAreaProvider>
         <View style={styles.view}>
           <TextInput
             style={styles.input}
-            label={<Text style={{ color: "#eeeeee" }}>Email</Text>}
+            label={<Text style={{ color: Theme.color }}>Email</Text>}
             value={email}
             textColor="#eeeeee"
             underlineColor="white"
@@ -64,7 +85,7 @@ export default function LogIn({ navigation }) {
             textColor="#eeeeee"
             activeUnderlineColor="white"
             underlineColor="white"
-            label={<Text style={{ color: "#eeeeee" }}>Password</Text>}
+            label={<Text style={{ color: Theme.color }}>Password</Text>}
             secureTextEntry={!showPassword}
             onChangeText={(text) => setPassword(text)}
             value={password}
@@ -72,7 +93,7 @@ export default function LogIn({ navigation }) {
               <TextInput.Icon
                 id="password-icon"
                 icon={passwordIcon}
-                color="white"
+                color={Theme.color}
                 onPress={togglePasswordVisibility}
               />
             }
@@ -89,7 +110,7 @@ export default function LogIn({ navigation }) {
               handleLogIn(email, password);
             }}
           >
-            <Text style={{ color: "white" }}>Giriş Yap</Text>
+            <Text style={{ color: Theme.color }}>Giriş Yap</Text>
           </Button>
 
           <Button
@@ -97,7 +118,7 @@ export default function LogIn({ navigation }) {
             style={{ marginTop: 10, alignItems: "flex-end" }}
             onPress={() => navigation.navigate("SignUp")}
           >
-            <Text style={{ color: "#eeeeee" }}>Kayıt Ol</Text>
+            <Text style={{ color: Theme.color }}>Kayıt Ol</Text>
           </Button>
         </View>
       </SafeAreaProvider>
@@ -105,19 +126,4 @@ export default function LogIn({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#282A3A",
-    paddingHorizontal: 20,
-  },
 
-  view: {
-    marginTop: "70%",
-  },
-
-  input: {
-    backgroundColor: "transparent",
-    marginVertical: 10,
-  },
-});

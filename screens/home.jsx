@@ -12,37 +12,52 @@ import { doc, getDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
 import { setAuthId } from "../redux/authentication";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useContext } from "react";
+import { ThemeContext } from "../Theme";
 
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function HomeScreen({ navigation }) {
-
-
   const theme = useTheme();
   theme.colors.secondaryContainer = "transparent";
+  const Theme = useContext(ThemeContext);
+
+
 
   const msgCount = useSelector((state) => state.msgCounter.value);
 
   return (
     <>
       <Tab.Navigator
+      
+        screenOptions={{
+          
+          // tabBarActiveBackgroundColor:'green',
+          tabBarInactiveTintColor: Theme.tabBarIcon,
+          tabBarActiveTintColor: Theme.tabBarIconActive,
+          headerShown: false,
+          tabBarStyle: {
+            
+            borderTopWidth:0,
+            backgroundColor: Theme.tabBar,
+            height:35,
+            borderTopLeftRadius:10,
+            borderTopRightRadius:10
+            
+          },
+          tabBarShowLabel: false,
+        }}
         style={{ backgroundColor: "black" }}
         initialRouteName="Search"
         activeColor="#fff"
         inactiveColor="#888888"
         labeled={false}
-        barStyle={{
-          backgroundColor: "#282A3A",
-          height: 60,
-          borderTopWidth: 2,
-          borderTopColor: "gray",
-          shadowColor: "blue",
-        }}
+        
       >
         <Tab.Screen
           name="ChatList"
           options={{
-            tabBarColor: "blue",
             tabBarBadge: msgCount !== 0 ? msgCount : null,
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons name="chat" color={color} size={26} />

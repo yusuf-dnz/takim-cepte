@@ -3,17 +3,24 @@ import { getAnalytics } from "firebase/analytics";
 import {getAuth} from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-
-
+import {
+  API_KEY,
+  AUTH_DOMAIN,
+  PROJECT_ID,
+  STORAGE_BUCKET,
+  MESSAGING_SENDER_ID,
+  ID,
+  MEASUREMENT_ID,
+} from "@env"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDyPEJx27qG7mt9-RjnV6q-5x_aWraJHN8",
-  authDomain: "takimcepte.firebaseapp.com",
-  projectId: "takimcepte",
-  storageBucket: "takimcepte.appspot.com",
-  messagingSenderId: "936682876365",
-  appId: "1:936682876365:web:af7b170301c99086fda884",
-  measurementId: "G-KX2ZN4792K"
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: ID,
+  measurementId: MEASUREMENT_ID,
 };
 
 export const app = initializeApp(firebaseConfig);
