@@ -11,40 +11,59 @@ import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
-import { setAuthId } from "../redux/authentication";
+import { setAuthId, setUserData } from "../redux/authentication";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useContext } from "react";
 import { ThemeContext } from "../Theme";
+import { useNavigation } from "@react-navigation/core";
 
 const Tab = createBottomTabNavigator();
 
 export default function HomeScreen({ navigation }) {
-  const theme = useTheme();
-  theme.colors.secondaryContainer = "transparent";
   const Theme = useContext(ThemeContext);
-
-
-
+  const dispatch = useDispatch();
   const msgCount = useSelector((state) => state.msgCounter.value);
+  const authId = useSelector((state) => state.authStatus.authId);
+
+  const [userDoc, setUserDoc] = useState(null);
+
+  useEffect(() => {
+    const getUserDoc = async (id) => {
+      try {
+        const docRef = doc(db, "users", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserDoc(docSnap.data());
+        } else {
+          dispatch(setUserData(null));
+          navigation.navigate("CreateProfile");
+        }
+      } catch (error) {
+        console.log("Hata mesajı: ", error);
+      }
+    };
+
+    getUserDoc(authId);
+  }, []);
+
+  useEffect(() => {
+    dispatch(setUserData(JSON.stringify(userDoc)));
+  }, [userDoc]);
 
   return (
     <>
       <Tab.Navigator
-      
         screenOptions={{
-          
           // tabBarActiveBackgroundColor:'green',
           tabBarInactiveTintColor: Theme.tabBarIcon,
           tabBarActiveTintColor: Theme.tabBarIconActive,
           headerShown: false,
           tabBarStyle: {
-            
-            borderTopWidth:0,
+            borderTopWidth: 0,
             backgroundColor: Theme.tabBar,
-            height:35,
-            borderTopLeftRadius:10,
-            borderTopRightRadius:10
-            
+            height: 35,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
           },
           tabBarShowLabel: false,
         }}
@@ -53,12 +72,16 @@ export default function HomeScreen({ navigation }) {
         activeColor="#fff"
         inactiveColor="#888888"
         labeled={false}
-        
       >
         <Tab.Screen
           name="ChatList"
           options={{
             tabBarBadge: msgCount !== 0 ? msgCount : null,
+            tabBarBadgeStyle: {
+              textShadowColor: "black",
+              color: "white",
+              backgroundColor: "#fa0000",
+            },
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons name="chat" color={color} size={26} />
             ),

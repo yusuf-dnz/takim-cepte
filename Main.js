@@ -24,33 +24,21 @@ const Stack = createStackNavigator();
 
 export default function Main() {
   const Theme = useContext(ThemeContext);
-
-  const [userDoc, setUserDoc] = useState(null);
-
-  const CurrentUser = useSelector((state) => state.authStatus.userData);
-
-  // console.log(user);
-
   const dispatch = useDispatch();
+
+  const authId = useSelector((state) => state.authStatus.authId);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        x(auth.currentUser.uid);
+        dispatch(setAuthId(auth.currentUser.uid));
       } else {
         dispatch(setUserData(null));
+        dispatch(setAuthId(null));
+
       }
     });
   }, []);
-
-  const x = async (id) => {
-    const docRef = doc(db, "users", id);
-    const docSnap = await getDoc(docRef);
-    setUserDoc(docSnap.data());
-  };
-  useEffect(() => {
-    dispatch(setUserData(JSON.stringify(userDoc)));
-  }, [userDoc]);
 
   const styles = StyleSheet.create({
     container: {
@@ -62,10 +50,11 @@ export default function Main() {
 
   return (
     <View style={styles.container}>
-      <NavigationContainer theme={{ colors: { background: Theme.backgroundColor } }}>
-        <Stack.Navigator 
-        >
-          {!CurrentUser ? (
+      <NavigationContainer
+        theme={{ colors: { background: Theme.backgroundColor } }}
+      >
+        <Stack.Navigator>
+          {!authId ? (
             <>
               <Stack.Screen
                 name="LogIn"
@@ -85,7 +74,11 @@ export default function Main() {
                 component={HomeScreen}
                 options={{ headerShown: false }}
               />
-
+              <Stack.Screen
+                name="CreateProfile"
+                component={CreateProfile}
+                options={{ headerShown: false }}
+              />
               <Stack.Screen
                 name="ChatScreen"
                 component={ChatScreen}
@@ -96,11 +89,7 @@ export default function Main() {
                 component={VisitProfile}
                 options={{ headerShown: false }}
               />
-              <Stack.Screen
-                name="CreateProfile"
-                component={CreateProfile}
-                options={{ headerShown: false }}
-              />
+
               <Stack.Screen
                 name="ParticipantsPage"
                 component={ParticipantsPage}
@@ -113,5 +102,3 @@ export default function Main() {
     </View>
   );
 }
-
-

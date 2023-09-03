@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { BackHandler, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  BackHandler,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import {
   TextInput,
   Avatar,
@@ -14,39 +20,27 @@ import { Timestamp } from "firebase/firestore";
 import { ThemeContext } from "../Theme";
 import { useContext } from "react";
 
-export default function LogIn({ navigation }) {
+export default function LogIn({ navigation, route }) {
   const Theme = useContext(ThemeContext);
-
-  // const theme = useTheme();
-  // theme.colors.secondaryContainer = "blue";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState("eye");
 
-  // useEffect(() => {
-  //   const backHandler = BackHandler.addEventListener(
-  //     "hardwareBackPress",
-  //     () => {
-  //       BackHandler.exitApp(); // Uygulamayı kapat
-  //       return true; // true döndürerek varsayılan geri tuşu işlevini engelle
-  //     }
-  //   );
-
-  //   return () => backHandler.remove(); // bileşen kaldırıldığında event listener'ı temizle
-  // }, []);
 
   const togglePasswordVisibility = () => {
     if (!showPassword) setPasswordIcon("eye-off");
     else setPasswordIcon("eye");
-
     setShowPassword(!showPassword);
   };
 
   const handleLogIn = async () => {
+    try {
       const { user } = await signInWithEmailAndPassword(auth, email, password);
-
+    } catch (error) {
+      console.log("Giriş Hatası: ", error);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -55,11 +49,11 @@ export default function LogIn({ navigation }) {
       backgroundColor: Theme.backgroundColor,
       paddingHorizontal: 20,
     },
-  
+
     view: {
       marginTop: "70%",
     },
-  
+
     input: {
       backgroundColor: "transparent",
       marginVertical: 10,
@@ -125,5 +119,3 @@ export default function LogIn({ navigation }) {
     </View>
   );
 }
-
-

@@ -9,6 +9,7 @@ import {
   Alert,
   Modal,
   Pressable,
+  BackHandler,
 } from "react-native";
 import { Avatar, Badge, IconButton, List, MD3Colors } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
@@ -33,6 +34,10 @@ import { SegmentedButtons, Button } from "react-native-paper";
 import axios from "axios";
 import { ThemeContext } from "../Theme";
 import { useContext } from "react";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/authentication";
+import { useFocusEffect } from "@react-navigation/core";
+import { useCallback } from "react";
 
 export const uriToBlob = (uri) => {
   return new Promise((resolve, reject) => {
@@ -53,7 +58,7 @@ export const uriToBlob = (uri) => {
 
 export default function CreateProfile({ navigation }) {
   const Theme = useContext(ThemeContext);
-
+  const dispatch = useDispatch();
 
   const [countrysData, setCountrysData] = useState([]);
   const [statesData, setStatesData] = useState([]);
@@ -71,7 +76,28 @@ export default function CreateProfile({ navigation }) {
   const [storageImageURL, setStorageImageURL] = useState("");
   const [date, setDate] = useState(new Date(1110000000000));
   const [gender, setGender] = React.useState("other");
-  const userID = auth.currentUser.uid;
+
+  const userId = auth.currentUser.uid;
+  const userEmail = auth.currentUser.email;
+  const createdAt = auth.currentUser.metadata.creationTime;
+
+  const backAction = () => {
+    return true;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+
+      return () => {
+        backHandler.remove();
+      };
+    }, [])
+  );
+
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -300,12 +326,16 @@ export default function CreateProfile({ navigation }) {
       !storageImageURL ||
       nameIcon.availableName == false
     ) {
-      // Eksik veri var, kullanıcıya bir uyarı gösterilebilir
       console.log("Lütfen zorunlu alanları doldurun.");
       return;
     }
 
-    await updateDoc(doc(db, "users", userID), {
+    let ProfileDoc = {
+      // displayName: displayName,
+      email: userEmail,
+      userId: userId,
+      createdDate: Timestamp.fromDate(new Date(createdAt)),
+      registeredEvents: [],
       country: country.name,
       state: state.name,
       cities: cities?.name ?? null,
@@ -313,11 +343,16 @@ export default function CreateProfile({ navigation }) {
       userDescription: description,
       bornDate: Timestamp.fromDate(date),
       storageProfileImageURL: storageImageURL,
-      profileDetailsCreated: true,
       userName: uniqueName,
-    });
+    };
 
-    navigation.navigate("HomeScreen");
+    try {
+      navigation.navigate("HomeScreen")
+      await setDoc(doc(db, "users", userId), ProfileDoc);
+      dispatch(setUserData(JSON.stringify(ProfileDoc)));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const pickImage = async () => {
@@ -331,7 +366,7 @@ export default function CreateProfile({ navigation }) {
     if (!result.canceled) {
       setImage(result.assets[0].uri);
 
-      const storageRef = ref(storage, `UserAvatars/${userID}/pp.jpg`);
+      const storageRef = ref(storage, `UserAvatars/${userId}/pp.jpg`);
       const blobFile = await uriToBlob(result.assets[0].uri);
       await uploadBytes(storageRef, blobFile).then(async (snapshot) => {
         const url = await getDownloadURL(storageRef);
@@ -348,10 +383,10 @@ export default function CreateProfile({ navigation }) {
   });
   const allowedPattern = /^[a-z0-9]*$/; // Sadece harf ve rakamlar izin veriliyor
 
-  const handleInputChange = async (newValue) => {
-    console.log(newValue)
+  const handleInputChange = (newValue) => {
+    console.log(newValue);
     if (newValue == "") {
-      console.log("boş")
+      console.log("boş");
       setUniqueName(newValue);
       setNameIcon({
         availableName: false,
@@ -359,25 +394,27 @@ export default function CreateProfile({ navigation }) {
         icon: "arrow-left-thick",
       });
     } else {
-    if (allowedPattern.test(newValue)) {
+      if (allowedPattern.test(newValue)) {
         setUniqueName(newValue);
 
-        const userNames = collection(db, "users");
-        const q = query(userNames, where("userName", "==", newValue));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-          setNameIcon({
-            availableName: true,
-            color: "green",
-            icon: "check-bold",
-          });
-        } else {
-          setNameIcon({
-            availableName: false,
-            color: "red",
-            icon: "close-thick",
-          });
-        }
+        setTimeout(async function () {
+          const userNames = collection(db, "users");
+          const q = query(userNames, where("userName", "==", newValue));
+          const querySnapshot = await getDocs(q);
+          if (querySnapshot.empty) {
+            setNameIcon({
+              availableName: true,
+              color: "green",
+              icon: "check-bold",
+            });
+          } else {
+            setNameIcon({
+              availableName: false,
+              color: "red",
+              icon: "close-thick",
+            });
+          }
+        }, 1000);
       }
     }
   };
@@ -388,7 +425,7 @@ export default function CreateProfile({ navigation }) {
       fontSize: 18,
       padding: 5,
     },
-  
+
     regionText: {
       backgroundColor: "transparent",
       maxWidth: 100,
@@ -431,7 +468,7 @@ export default function CreateProfile({ navigation }) {
       padding: 10,
       elevation: 2,
     },
-  
+
     buttonClose: {
       backgroundColor: "gray",
     },
@@ -453,7 +490,9 @@ export default function CreateProfile({ navigation }) {
 
   return (
     <View>
-      <SafeAreaView style={{ backgroundColor: Theme.backgroundColor, height: "100%" }}>
+      <SafeAreaView
+        style={{ backgroundColor: Theme.backgroundColor, height: "100%" }}
+      >
         <StaticTopBar text={"Profilini Oluştur"} />
 
         <ScrollView style={{ padding: 10 }}>
@@ -679,5 +718,3 @@ export default function CreateProfile({ navigation }) {
     </View>
   );
 }
-
-

@@ -36,12 +36,11 @@ import { useContext } from "react";
 import { ThemeContext } from "../Theme";
 
 export default function ChatList({ navigation }) {
-  const currentUserID = auth.currentUser.uid; // AUTH VERİSİ ID
+  const currentUser = auth.currentUser.uid; // AUTH VERİSİ ID
   const [chats, setChats] = useState([]);
   const [onSnap, setOnSnap] = useState([]);
 
   const Theme = useContext(ThemeContext);
-
 
   let totalUnRead = 0;
   const dispatch = useDispatch();
@@ -49,7 +48,7 @@ export default function ChatList({ navigation }) {
   useEffect(() => {
     const docRef = query(
       collection(db, "chats"),
-      where("participants", "array-contains", currentUserID)
+      where("participants", "array-contains", currentUser)
     );
     const unsub = onSnapshot(docRef, (querySnapshot) => {
       console.log("ONSNAP ÇALIŞTI");
@@ -67,7 +66,7 @@ export default function ChatList({ navigation }) {
       let targetUser;
       const chatData = doc;
       const chatUsers = doc.data().participants;
-      if (chatUsers[0] == currentUserID) {
+      if (chatUsers[0] == currentUser) {
         targetUser = chatUsers[1];
       } else targetUser = chatUsers[0];
 
@@ -78,26 +77,24 @@ export default function ChatList({ navigation }) {
 
   const createTargetChats = async (x, y) => {
     let unreadCounter = 0;
-    const lastView = x.data()[currentUserID];
+    const lastView = x.data()[currentUser];
     const msgs = x.data().messages;
 
-    msgs?.map((msg) => {
-      const targetTS = msg.createdAt;
+    if (msgs && msgs.length > 0) {
+      for (const msg of msgs) {
+        const targetTS = msg.createdAt;
 
-      if (lastView.seconds === targetTS.seconds) {
-        if (lastView.nanoseconds === targetTS.nanoseconds) {
-          return; // İki timestamp de eşit
-        } else if (lastView.nanoseconds > targetTS.nanoseconds) {
-          return; // timestamp1 daha yeni
-        } else {
-          unreadCounter++; // timestamp2 daha yeni
-        }
-      } else if (lastView.seconds > targetTS.seconds) {
-        return; // timestamp1 daha yeni
-      } else {
-        unreadCounter++; // timestamp2 daha yeni
+        if (
+          lastView.seconds === targetTS.seconds &&
+          lastView.nanoseconds < targetTS.nanoseconds
+        ) {
+          unreadCounter++;
+        } else if (lastView.seconds < targetTS.seconds) {
+          unreadCounter++;
+        } else break;
       }
-    });
+    }
+
     totalUnRead = totalUnRead + unreadCounter;
 
     const docRef = doc(db, "users", y);
@@ -122,28 +119,34 @@ export default function ChatList({ navigation }) {
     const lastView = Timestamp.fromDate(date);
     const chatRef = doc(db, "chats", targetChat);
     await updateDoc(chatRef, {
-      [currentUserID]: lastView,
+      [currentUser]: lastView,
     });
   };
 
   return (
-    <View style={{}}>
-      <SafeAreaView style={{ backgroundColor: Theme.backgroundColor, minHeight: "100%" }}>
+    <View>
+      <SafeAreaView
+        style={{ backgroundColor: Theme.backgroundColor, minHeight: "100%" }}
+      >
         <StaticTopBar text={"Konuşmalar"} />
 
         <ScrollView>
-          <View style={{ flex: 1, marginHorizontal: 10 , marginBottom:50 }}>
+          <View style={{ flex: 1, marginHorizontal: 10, marginBottom: 50 }}>
             {chats.map((chat, index) => (
               <React.Fragment key={index}>
                 <List.Item
-                  style={{backgroundColor:Theme.component,borderRadius:5,marginVertical:5}}
+                  style={{
+                    backgroundColor: Theme.component,
+                    borderRadius: 5,
+                    marginVertical: 5,
+                  }}
                   title={chat.targetUserName}
                   titleStyle={{ color: Theme.color }}
                   description={(chat.messages ?? [])[0]?.text ?? undefined}
                   descriptionStyle={{ color: Theme.color }}
                   left={() => (
                     <Avatar.Image
-                      style={{marginLeft:5}}
+                      style={{ marginLeft: 5 }}
                       size={56}
                       source={{ uri: chat.targetUserImage }}
                     />

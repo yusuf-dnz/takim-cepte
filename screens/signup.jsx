@@ -4,25 +4,23 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
-import {  StyleSheet, Text, View } from "react-native";
-import { TextInput, Avatar, Button } from "react-native-paper";
+import { StyleSheet, Text, View } from "react-native";
+import { TextInput, Button } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { auth, db } from "../firebase";
-import { doc,  setDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore";
 import { useContext } from "react";
 import { ThemeContext } from "../Theme";
 
-export default function SignUp({ navigation }) {
+export default function SignUp({ navigation, route }) {
   const Theme = useContext(ThemeContext);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRepeatPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [displayName, setDisplayName] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [passwordIcon, setPasswordIcon] = useState("eye");
+
 
   const togglePasswordVisibility = () => {
     if (!showPassword) setPasswordIcon("eye-off");
@@ -32,43 +30,20 @@ export default function SignUp({ navigation }) {
 
   const handleSignUp = async () => {
     if (password != rePassword) {
-      
-      console.log("şifre eşleşmedi kontrol et"); //toast message ekle
+      console.warn("şifre eşleşmedi kontrol et");
       setPasswordMatch(false);
     } else {
       setPasswordMatch(true);
-
-      const date = new Date()
-      const createdDate = Timestamp.fromDate(date)
-
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      await setDoc(doc(db, "users", user.uid), {
-        email: email,
-        displayName: displayName,
-        userId: user.uid,
-        profileDetailsCreated: false,
-        createdDate: createdDate,
-        registeredEvents: [],
-      });
-
-      onAuthStateChanged(auth, (user) => {
-        console.log("auth state");
-        if (user) {
-          console.log("user var");
-
-          navigation.navigate("CreateProfile");
-
-          console.log("giriş yapılmış");
-        } else {
-          console.log("user kayıt sorunu");
-        }
-      });
+      try {
+        const { user } = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+      } catch (error) {
+        console.log(error);
+      }
     }
-    return;
   };
 
   const styles = StyleSheet.create({
@@ -77,11 +52,11 @@ export default function SignUp({ navigation }) {
       backgroundColor: Theme.backgroundColor,
       paddingHorizontal: 20,
     },
-  
+
     view: {
       marginTop: "50%",
     },
-  
+
     input: {
       backgroundColor: "transparent",
       marginVertical: 10,
@@ -92,15 +67,6 @@ export default function SignUp({ navigation }) {
     <View style={styles.container}>
       <SafeAreaProvider>
         <View style={styles.view}>
-          <TextInput
-            style={styles.input}
-            textColor={Theme.color}
-            activeUnderlineColor={Theme.color}
-            underlineColor={Theme.color}
-            label={<Text style={{ color: Theme.color }}>Display Name</Text>}
-            value={displayName}
-            onChangeText={(text) => setDisplayName(text)}
-          />
           <TextInput
             style={styles.input}
             label={<Text style={{ color: Theme.color }}>Email</Text>}
@@ -173,5 +139,3 @@ export default function SignUp({ navigation }) {
     </View>
   );
 }
-
-

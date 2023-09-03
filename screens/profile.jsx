@@ -51,7 +51,7 @@ export default function Profile({ navigation }) {
         text: "Evet",
         onPress: async (e) => {
           await signOut(auth);
-          // dispatch(setUserData(null)); //// Main js de ayarlandı ancak güvenlik açısından kontrol et !!
+//          dispatch(setUserData(null)); //// Main js de ayarlandı ancak güvenlik açısından kontrol et !!
           console.log("çıkış yapıldı");
         },
       },
@@ -277,9 +277,6 @@ export default function Profile({ navigation }) {
                   </React.Fragment>
                 ))}
 
-                {/* <View style={styles.eventBadges}>
-                  
-                  </View> */}
               </ScrollView>
               <IconButton
                 icon="plus-thick"
@@ -292,7 +289,7 @@ export default function Profile({ navigation }) {
 
           <View style={styles.bioView}>
             <Text style={{ color: Theme.color, marginTop: 5 }}>
-              {userProfileData.userDescription ?? "Biyografi ne eklemek istediklerin"}
+              {userProfileData.userDescription ?? "Biyografi ne eklemek istediklerin..."}
             </Text>
           </View>
 
