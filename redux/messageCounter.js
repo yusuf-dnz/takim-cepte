@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   value: 0,
+  messages: null,
 };
 
 const counterSlice = createSlice({
@@ -11,6 +12,10 @@ const counterSlice = createSlice({
     updateMsgCounter: (state, action) => {
       state.value = action.payload;
     },
+    setMessagesData: (state,action) =>{
+      state.messages = JSON.parse(action.payload);
+
+    }
   },
 });
 

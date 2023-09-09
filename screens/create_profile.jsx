@@ -11,7 +11,14 @@ import {
   Pressable,
   BackHandler,
 } from "react-native";
-import { Avatar, Badge, IconButton, List, MD3Colors } from "react-native-paper";
+import {
+  Avatar,
+  Badge,
+  IconButton,
+  List,
+  MD3Colors,
+  useTheme,
+} from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import StaticTopBar from "../components/StaticTopBar";
@@ -38,6 +45,9 @@ import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/authentication";
 import { useFocusEffect } from "@react-navigation/core";
 import { useCallback } from "react";
+import { COUNTRY_STATE_CITY_API_KEY } from "@env";
+import { Toast } from "react-native-toast-message/lib/src/Toast";
+// import Toast from 'react-native-toast-message';
 
 export const uriToBlob = (uri) => {
   return new Promise((resolve, reject) => {
@@ -59,6 +69,8 @@ export const uriToBlob = (uri) => {
 export default function CreateProfile({ navigation }) {
   const Theme = useContext(ThemeContext);
   const dispatch = useDispatch();
+  const theme = useTheme();
+  theme.colors.secondaryContainer = Theme.secondaryContainer;
 
   const [countrysData, setCountrysData] = useState([]);
   const [statesData, setStatesData] = useState([]);
@@ -69,17 +81,30 @@ export default function CreateProfile({ navigation }) {
   const [cities, setCities] = useState(null);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState(null); //Modal içeriği
+  const [modalContent, setModalContent] = useState(null);
 
   const [description, onChangeDescription] = React.useState("");
-  const [image, setImage] = useState(null);
   const [storageImageURL, setStorageImageURL] = useState("");
   const [date, setDate] = useState(new Date(1110000000000));
   const [gender, setGender] = React.useState("other");
 
+  const [page, setPage] = useState(false);
+
   const userId = auth.currentUser.uid;
   const userEmail = auth.currentUser.email;
   const createdAt = auth.currentUser.metadata.creationTime;
+
+  const changeScreen = () => {
+    if (country) {
+      setPage(true);
+    } else {
+      Toast.show({
+        position: "bottom",
+        type: "error",
+        text1: "Ülke seçimi zorunlu alan!",
+      });
+    }
+  };
 
   const backAction = () => {
     return true;
@@ -98,7 +123,6 @@ export default function CreateProfile({ navigation }) {
     }, [])
   );
 
-
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setDate(currentDate);
@@ -115,30 +139,30 @@ export default function CreateProfile({ navigation }) {
   };
 
   //////////////////////////////////////////////////////////
-  const countrysLister = async () => {
-    var config = {
-      method: "get",
-      url: "https://api.countrystatecity.in/v1/countries/",
-      headers: {
-        "X-CSCAPI-KEY":
-          "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
-      },
-    };
-
-    axios(config)
-      .then(function (response) {
-        setState(null);
-        setCities(null);
-        setCountrysData(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-
-    setModalVisible(true);
-  };
-
   useEffect(() => {
+    const getCountryList = async () => {
+      var config = {
+        method: "get",
+        url: "https://api.countrystatecity.in/v1/countries/",
+        headers: {
+          "X-CSCAPI-KEY": COUNTRY_STATE_CITY_API_KEY,
+        },
+      };
+
+      axios(config)
+        .then(function (response) {
+          setState(null);
+          setCities(null);
+          setCountrysData(response.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    };
+    getCountryList();
+  }, []);
+
+  const countrysLister = () => {
     setModalContent(
       <>
         <ScrollView>
@@ -178,11 +202,17 @@ export default function CreateProfile({ navigation }) {
         </Pressable>
       </>
     );
-  }, [countrysData]);
 
-  const statesLister = () => {
+    setModalVisible(true);
+  };
+
+  const statesLister = async () => {
     if (country == null) {
-      console.log("ülke seçmediniz");
+      Toast.show({
+        type: "error",
+        text1: "Bir saniye!",
+        text2: "Ülke seçmelisin 😊 ",
+      });
     } else {
       const stateUrl = `https://api.countrystatecity.in/v1/countries/${country.iso2}/states/`;
 
@@ -190,14 +220,19 @@ export default function CreateProfile({ navigation }) {
         method: "get",
         url: stateUrl,
         headers: {
-          "X-CSCAPI-KEY":
-            "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
+          "X-CSCAPI-KEY": COUNTRY_STATE_CITY_API_KEY,
         },
       };
 
       axios(config)
         .then(function (response) {
+          function sortNames(a, b) {
+            return a.name - b.name;
+          }
+
           setCities(null);
+          response.data.sort((a, b) => a.name.localeCompare(b.name));
+
           setStatesData(response.data);
         })
         .catch(function (error) {
@@ -252,7 +287,11 @@ export default function CreateProfile({ navigation }) {
 
   const citiesLister = () => {
     if (state == null) {
-      console.log("şehir seçmediniz");
+      Toast.show({
+        type: "error",
+        text1: "Bir saniye!",
+        text2: "Şehir seçmelisin 😊",
+      });
     } else {
       const citiesUrl = `https://api.countrystatecity.in/v1/countries/${country.iso2}/states/${state.iso2}/cities/`;
 
@@ -260,14 +299,13 @@ export default function CreateProfile({ navigation }) {
         method: "get",
         url: citiesUrl,
         headers: {
-          "X-CSCAPI-KEY":
-            "eXdUWjJ3Skhod29weFdleFBaZGFqT3VKeG9mdXdBN0hJaTRMVlZCSw==",
+          "X-CSCAPI-KEY": COUNTRY_STATE_CITY_API_KEY,
         },
       };
 
       axios(config)
         .then(function (response) {
-          setCitiesData(response.data);
+          setCitiesData(response.data.sort());
         })
         .catch(function (error) {
           console.log(error);
@@ -322,11 +360,15 @@ export default function CreateProfile({ navigation }) {
   const addProfileDetails = async () => {
     if (
       !country ||
-      !state ||
       !storageImageURL ||
       nameIcon.availableName == false
     ) {
-      console.log("Lütfen zorunlu alanları doldurun.");
+      Toast.show({
+        position: "bottom",
+        type: "error",
+        text1: "Gerekli alanlar doldurulmadı !",
+        visibilityTime: 2000,
+      });
       return;
     }
 
@@ -337,17 +379,20 @@ export default function CreateProfile({ navigation }) {
       createdDate: Timestamp.fromDate(new Date(createdAt)),
       registeredEvents: [],
       country: country.name,
-      state: state.name,
+      state: state?.name ?? null,
       cities: cities?.name ?? null,
       userGender: gender,
       userDescription: description,
       bornDate: Timestamp.fromDate(date),
       storageProfileImageURL: storageImageURL,
       userName: uniqueName,
+      disabled: false,
+      emailVerified: false,
+
     };
 
     try {
-      navigation.navigate("HomeScreen")
+      navigation.navigate("HomeScreen");
       await setDoc(doc(db, "users", userId), ProfileDoc);
       dispatch(setUserData(JSON.stringify(ProfileDoc)));
     } catch (error) {
@@ -364,7 +409,7 @@ export default function CreateProfile({ navigation }) {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      // setImage(result.assets[0].uri);
 
       const storageRef = ref(storage, `UserAvatars/${userId}/pp.jpg`);
       const blobFile = await uriToBlob(result.assets[0].uri);
@@ -384,9 +429,7 @@ export default function CreateProfile({ navigation }) {
   const allowedPattern = /^[a-z0-9]*$/; // Sadece harf ve rakamlar izin veriliyor
 
   const handleInputChange = (newValue) => {
-    console.log(newValue);
     if (newValue == "") {
-      console.log("boş");
       setUniqueName(newValue);
       setNameIcon({
         availableName: false,
@@ -420,6 +463,11 @@ export default function CreateProfile({ navigation }) {
   };
 
   const styles = StyleSheet.create({
+    fieldDescription: {
+      textAlign: "center",
+      color: Theme.color,
+      marginTop: "10%",
+    },
     genderButtonText: {
       color: Theme.softColor,
       fontSize: 18,
@@ -432,32 +480,40 @@ export default function CreateProfile({ navigation }) {
       height: 40,
       borderRadius: 5,
     },
-    container: {
-      borderRadius: 5,
-      width: "100%",
-      height: Dimensions.get("window").width - 20,
-      overflow: "hidden",
-      backgroundColor: "#00000095",
+    pictureArea: {
+      marginVertical: 10,
+      width: 202,
+      height: 202,
+      marginLeft: "auto",
+      marginRight: "auto",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: Theme.secondaryContainer,
     },
     image: {
+      marginLeft: "auto",
+      marginRight: "auto",
       flex: 1,
-      width: null,
-      height: null,
+      width: 200,
+      height: 200,
+      borderRadius: 10,
+      backgroundColor: "#01000550",
     },
     centeredView: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      marginTop: 22,
     },
     modalView: {
+      marginTop: "20%",
+      maxHeight: "80%",
       margin: 20,
-      backgroundColor: Theme.backgroundColor,
+      backgroundColor: Theme.modalColor,
       borderRadius: 5,
       padding: 35,
       shadowColor: "#000",
       shadowOffset: {
-        width: 0,
+        width: 2,
         height: 2,
       },
       shadowOpacity: 0.25,
@@ -490,231 +546,296 @@ export default function CreateProfile({ navigation }) {
 
   return (
     <View>
-      <SafeAreaView
-        style={{ backgroundColor: Theme.backgroundColor, height: "100%" }}
-      >
-        <StaticTopBar text={"Profilini Oluştur"} />
-
-        <ScrollView style={{ padding: 10 }}>
-          <View style={styles.container}>
-            {storageImageURL && (
-              <Image source={{ uri: storageImageURL }} style={styles.image} />
-            )}
-          </View>
-
-          <View style={{ alignItems: "flex-end", marginTop: -40 }}>
-            <IconButton
-              icon="camera"
-              iconColor={"white"}
-              animated={true}
-              size={20}
-              onPress={pickImage}
-            />
-          </View>
-
-          <View
+      {!page ? (
+        <>
+          <SafeAreaView
             style={{
-              flexDirection: "row",
-              padding: 8,
-              justifyContent: "space-around",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "CabinRegular",
-                color: Theme.color,
-                fontSize: 25,
-              }}
-            >
-              @
-            </Text>
-            <TextInput
-              style={{
-                width: "80%",
-                height: 40,
-                borderBottomWidth: 1,
-                paddingHorizontal: 5,
-                color: Theme.color,
-                fontFamily: "CabinRegular",
-                fontSize: 20,
-              }}
-              inlineImageLeft=""
-              onChangeText={handleInputChange}
-              value={uniqueName}
-              placeholder="Kullanıcı adı"
-              placeholderTextColor={"#eeeeeeaa"}
-            />
-            <Avatar.Icon
-              style={{ backgroundColor: "transparent" }}
-              color={nameIcon.color}
-              size={40}
-              icon={nameIcon.icon}
-            />
-          </View>
-
-          <View
-            style={{
-              backgroundColor: Theme.component,
-              borderBottomColor: "#000000",
-              minHeight: 150,
-              borderRadius: 5,
-            }}
-          >
-            <TextInput
-              editable
-              multiline
-              placeholder="Açıklama ekleyebilirsin..."
-              placeholderTextColor={"#eeeeeeaa"}
-              maxLength={400}
-              onChangeText={(text) => onChangeDescription(text)}
-              value={description}
-              style={{ padding: 10, color: Theme.color }}
-            />
-          </View>
-
-          <Pressable
-            style={{
-              marginTop: 5,
-              padding: 10,
-              backgroundColor: Theme.component,
-              borderRadius: 5,
-            }}
-            onPress={() => showDatepicker()}
-          >
-            <View
-              style={{
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: Theme.softColor,
-                  fontSize: 20,
-                  textAlign: "center",
-                }}
-              >
-                {date.getDate()} / {date.getMonth() + 1} / {date.getFullYear()}
-              </Text>
-            </View>
-          </Pressable>
-
-          <View
-            style={{
-              marginTop: 5,
               backgroundColor: Theme.backgroundColor,
-              borderRadius: 5,
-              padding: 10,
-              alignItems: "center",
+              height: "100%",
             }}
           >
+            <ScrollView style={{ padding: 10 }}>
+              <View style={{ marginTop: "30%" }}>
+                <View>
+                  <Text style={styles.fieldDescription}> Konum</Text>
+                  <Text
+                    style={{
+                      color: Theme.danger,
+                      fontSize: 10,
+                      position: "absolute",
+                      right: 0,
+                      bottom: 0,
+                    }}
+                  >
+                    * Ülke seçimi zorunlu
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    marginTop: 5,
+                    backgroundColor: Theme.backgroundColor,
+                    borderRadius: 5,
+                    paddingHorizontal: 10,
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      width: "80%",
+                    }}
+                  >
+                    <Button
+                      rippleColor={Theme.secondaryContainer}
+                      textColor={Theme.softColor}
+                      onPress={() => countrysLister()}
+                      style={styles.regionText}
+                    >
+                      {country?.name ?? "Ülke"}
+                    </Button>
+                    <Text style={{ fontSize: 25, color: Theme.softColor }}>
+                      /{" "}
+                    </Text>
+
+                    <Button
+                      rippleColor={Theme.secondaryContainer}
+                      textColor={Theme.softColor}
+                      onPress={() => statesLister()}
+                      style={styles.regionText}
+                    >
+                      {state?.name ?? "Şehir"}
+                    </Button>
+                    <Text style={{ fontSize: 25, color: Theme.softColor }}>
+                      /{" "}
+                    </Text>
+
+                    <Button
+                      rippleColor={Theme.secondaryContainer}
+                      textColor={Theme.softColor}
+                      onPress={() => citiesLister()}
+                      style={styles.regionText}
+                    >
+                      {cities?.name ?? "İlçe"}
+                    </Button>
+                  </View>
+                </View>
+
+                <Text style={styles.fieldDescription}>
+                  Doğum Tarihi Seçiniz
+                  <Text style={{ color: Theme.danger }}> *</Text>
+                </Text>
+                <Pressable
+                  style={{
+                    marginTop: 5,
+                    padding: 10,
+                    backgroundColor: Theme.component,
+                    borderRadius: 5,
+                  }}
+                  onPress={() => showDatepicker()}
+                >
+                  <View
+                    style={{
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: Theme.softColor,
+                        fontSize: 20,
+                        textAlign: "center",
+                      }}
+                    >
+                      {date.getDate()} / {date.getMonth() + 1} /{" "}
+                      {date.getFullYear()}
+                    </Text>
+                  </View>
+                </Pressable>
+
+                <Text style={styles.fieldDescription}>
+                  {" "}
+                  Cinsiyet
+                  <Text style={{ color: Theme.danger }}> *</Text>
+                </Text>
+
+                <View
+                  style={{
+                    alignItems: "center",
+                    marginTop: 5,
+                    padding: 5,
+                    height: 80,
+                  }}
+                >
+                  <SegmentedButtons
+                    style={{
+                      borderRadius: 20,
+                      backgroundColor: Theme.component,
+                    }}
+                    value={gender}
+                    onValueChange={setGender}
+                    buttons={[
+                      {
+                        value: "male",
+                        label: "Erkek",
+                        checkedColor: "#54BAB9",
+                        uncheckedColor: Theme.color,
+                        icon: "face-man-shimmer",
+                      },
+                      {
+                        value: "other",
+                        label: "Belirtmek İstemiyorum",
+                        checkedColor: "#344e41",
+                        uncheckedColor: Theme.color,
+                      },
+                      {
+                        value: "female",
+                        label: "Kadın",
+                        checkedColor: "#C23373",
+                        uncheckedColor: Theme.color,
+
+                        icon: "face-woman-shimmer",
+                      },
+                    ]}
+                  />
+                </View>
+
+                <View style={styles.centeredView}>
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(!modalVisible)}
+                  >
+                    <View style={styles.modalView}>{modalContent}</View>
+                  </Modal>
+                </View>
+              </View>
+            </ScrollView>
+
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                width: "80%",
+                alignItems: "center",
+                backgroundColor: "transparent",
+                borderTopColor: "rgba(0,0,255,0.2)",
+                borderTopWidth: 2,
               }}
             >
-              <Button
-                rippleColor="white"
-                textColor={Theme.softColor}
-                onPress={() => countrysLister()}
-                style={styles.regionText}
-              >
-                {country?.name ?? "Ülke"}
-              </Button>
-              <Text style={{ fontSize: 25, color: Theme.softColor }}>/ </Text>
-
-              <Button
-                rippleColor="white"
-                textColor={Theme.softColor}
-                onPress={() => statesLister()}
-                style={styles.regionText}
-              >
-                {state?.name ?? "Şehir"}
-              </Button>
-              <Text style={{ fontSize: 25, color: Theme.softColor }}>/ </Text>
-
-              <Button
-                rippleColor="white"
-                textColor={Theme.softColor}
-                onPress={() => citiesLister()}
-                style={styles.regionText}
-              >
-                {cities?.name ?? "İlçe"}
-              </Button>
+              <IconButton
+                icon="check-bold"
+                iconColor={"white"}
+                animated={true}
+                size={20}
+                onPress={changeScreen}
+              />
             </View>
-          </View>
-
-          <View
+          </SafeAreaView>
+        </>
+      ) : (
+        <>
+          <SafeAreaView
             style={{
-              alignItems: "center",
-              marginTop: 5,
-              padding: 5,
-              height: 80,
+              backgroundColor: Theme.backgroundColor,
+              height: "100%",
             }}
           >
-            <SegmentedButtons
-              style={{ borderRadius: 20, backgroundColor: Theme.component }}
-              value={gender}
-              onValueChange={setGender}
-              buttons={[
-                {
-                  value: "male",
-                  label: "Erkek",
-                  checkedColor: "green",
-                  uncheckedColor: "white",
-                  icon: "face-man-shimmer",
-                },
-                {
-                  value: "other",
-                  label: "Belirtme",
-                  checkedColor: "red",
-                  uncheckedColor: "white",
-                },
-                {
-                  value: "female",
-                  label: "Kadın",
-                  checkedColor: "purple",
-                  uncheckedColor: "white",
-
-                  icon: "face-woman-shimmer",
-                },
-              ]}
+            <IconButton
+              style={{}}
+              icon="arrow-left-bold"
+              iconColor={Theme.color}
+              onPress={()=>setPage(false)}
             />
-          </View>
+            <ScrollView style={{ padding: 10 }}>
+              <View style={{ marginTop: "30%" }}>
+                <View style={styles.pictureArea}>
+                  {storageImageURL && (
+                    <Image
+                      source={{ uri: storageImageURL }}
+                      style={styles.image}
+                    />
+                  )}
 
-          <View style={styles.centeredView}>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                Alert.alert("Modal has been closed.");
-                setModalVisible(!modalVisible);
+                  <View
+                    style={{
+                      zIndex: 1,
+                      position: "absolute",
+                      bottom: 0,
+                      right: 0,
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    <IconButton
+                      style={{}}
+                      icon="camera"
+                      iconColor={"white"}
+                      animated={true}
+                      size={20}
+                      onPress={pickImage}
+                    />
+                  </View>
+                </View>
+
+                <View style={{ marginLeft: "auto", marginRight: "auto" }}>
+                  <View
+                    style={{
+                      width: "80%",
+                      flexDirection: "row",
+                      padding: 5,
+                    }}
+                  >
+                    <TextInput
+                      style={{
+                        width: "80%",
+                        height: 40,
+                        borderBottomWidth: 1,
+                        borderBottomColor: Theme.softColor,
+                        paddingHorizontal: 5,
+                        color: Theme.color,
+                        fontFamily: "CabinRegular",
+                        fontSize: 20,
+                      }}
+                      onChangeText={handleInputChange}
+                      value={uniqueName}
+                      placeholder="Kullanıcı adı"
+                      placeholderTextColor={Theme.softColor}
+                    />
+                    <View>
+                      <Avatar.Icon
+                        style={{
+                          backgroundColor: "white",
+                          position: "absolute",
+                          bottom: 5,
+                          left: -30,
+                        }}
+                        color={nameIcon.color}
+                        size={25}
+                        icon={nameIcon.icon}
+                      />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            <View
+              style={{
+                alignItems: "center",
+                backgroundColor: "transparent",
+                borderTopColor: "rgba(0,0,255,0.2)",
+                borderTopWidth: 2,
               }}
             >
-              <View style={styles.modalView}>{modalContent}</View>
-            </Modal>
-          </View>
-        </ScrollView>
-
-        <View
-          style={{
-            alignItems: "flex-end",
-            backgroundColor: "transparent",
-            borderTopColor: "rgba(0,0,255,0.2)",
-            borderTopWidth: 2,
-          }}
-        >
-          <IconButton
-            icon="arrow-right"
-            iconColor={"white"}
-            animated={true}
-            size={20}
-            onPress={addProfileDetails}
-          />
-        </View>
-      </SafeAreaView>
+              <IconButton
+                icon="check-bold"
+                iconColor={"white"}
+                animated={true}
+                size={20}
+                onPress={addProfileDetails}
+              />
+            </View>
+          </SafeAreaView>
+        </>
+      )}
     </View>
   );
 }

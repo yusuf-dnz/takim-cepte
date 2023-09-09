@@ -128,48 +128,73 @@ export default function ChatList({ navigation }) {
       <SafeAreaView
         style={{ backgroundColor: Theme.backgroundColor, minHeight: "100%" }}
       >
-        <StaticTopBar text={"Konuşmalar"} />
+        {/* <StaticTopBar text={"Konuşmalar"} /> */}
 
-        <ScrollView>
-          <View style={{ flex: 1, marginHorizontal: 10, marginBottom: 50 }}>
-            {chats.map((chat, index) => (
-              <React.Fragment key={index}>
-                <List.Item
+        <ScrollView style={{ flex: 1, marginHorizontal: 10, marginBottom: 50 ,height:"100%",}}>
+            {!chats.length ? (
+              <>
+                <View
                   style={{
-                    backgroundColor: Theme.component,
-                    borderRadius: 5,
-                    marginVertical: 5,
+                    marginTop:"100%",
+                    display: "flex",
+                    alignItems: "center",
+                    height:"100%"
                   }}
-                  title={chat.targetUserName}
-                  titleStyle={{ color: Theme.color }}
-                  description={(chat.messages ?? [])[0]?.text ?? undefined}
-                  descriptionStyle={{ color: Theme.color }}
-                  left={() => (
-                    <Avatar.Image
-                      style={{ marginLeft: 5 }}
-                      size={56}
-                      source={{ uri: chat.targetUserImage }}
+                >
+                  <Text style={{color:Theme.color}}>Henüz mesajın yok! </Text>
+                  <Text style={{color:Theme.color}}>Etkinlikler ve keşfeten insanlarla tanış. </Text>
+                </View>
+              </>
+            ) : (
+              <>
+                {chats.map((chat, index) => (
+                  <React.Fragment key={index}>
+                    <List.Item
+                      style={{
+                        backgroundColor: Theme.component,
+                        borderRadius: 5,
+                        marginVertical: 5,
+                      }}
+                      title={chat.targetUserName}
+                      titleStyle={{ color: Theme.color }}
+                      description={(chat.messages ?? [])[0]?.text ?? undefined}
+                      descriptionStyle={{ color: Theme.color }}
+                      left={() => (
+                        <Avatar.Image
+                          style={{ marginLeft: 5 }}
+                          size={56}
+                          source={{ uri: chat.targetUserImage }}
+                        />
+                      )}
+                      right={() => (
+                        <>
+                          {chat.unreadMessages !== 0 ? (
+                            <Badge
+                              style={{
+                                position: "absolute",
+                                top: "30%",
+                                right: "5%",
+                              }}
+                              size={20}
+                            >
+                              {chat.unreadMessages}
+                            </Badge>
+                          ) : null}
+                        </>
+                      )}
+                      onPress={() => {
+                        navigation.navigate("ChatScreen", {
+                          chatId: chat.chatID,
+                          targetUserName: chat.targetUserName,
+                          targetUserImage: chat.targetUserImage,
+                        });
+                        updateLastView(chat.chatID);
+                      }}
                     />
-                  )}
-                  right={() => (
-                    <>
-                      {chat.unreadMessages !== 0 ? (
-                        <Badge size={20}>{chat.unreadMessages}</Badge>
-                      ) : null}
-                    </>
-                  )}
-                  onPress={() => {
-                    navigation.navigate("ChatScreen", {
-                      chatId: chat.chatID,
-                      targetUserName: chat.targetUserName,
-                      targetUserImage: chat.targetUserImage,
-                    });
-                    updateLastView(chat.chatID);
-                  }}
-                />
-              </React.Fragment>
-            ))}
-          </View>
+                  </React.Fragment>
+                ))}
+              </>
+            )}
         </ScrollView>
       </SafeAreaView>
     </View>

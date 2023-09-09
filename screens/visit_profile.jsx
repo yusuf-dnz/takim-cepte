@@ -6,6 +6,8 @@ import {
   Dimensions,
   Image,
   Pressable,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { auth, db, storage } from "../firebase";
@@ -41,7 +43,7 @@ export default function VisitProfile({ navigation }) {
   const CurrentUser = useSelector((state) => state.authStatus.userData.userId);
   const route = useRoute();
   const targetUserData = route.params.targetUserData;
-
+  const [inspectPicture, showInspectPicture] = useState(false);
 
   const createChat = async (targetID) => {
     const date = new Date();
@@ -135,8 +137,8 @@ export default function VisitProfile({ navigation }) {
     },
     image: {
       borderRadius: 20,
-      width: "49%",
-      height: null,
+      width: "100%",
+      height: "100%",
     },
     displayNameText: {
       color: Theme.color,
@@ -161,6 +163,29 @@ export default function VisitProfile({ navigation }) {
 
   return (
     <SafeAreaView>
+      <Modal
+        animationType="fade"
+        transparent={false}
+        visible={inspectPicture}
+        onRequestClose={() => {
+          showInspectPicture(!inspectPicture);
+        }}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "black",
+            height: "100%",
+          }}
+        >
+          <Image
+            source={{ uri: targetUserData.storageProfileImageURL }}
+            style={{ width: "100%", height: Dimensions.get("window").width }}
+            resizeMode="cover"
+          />
+        </View>
+      </Modal>
       <ScrollView
         style={{
           backgroundColor: Theme.backgroundColor,
@@ -169,11 +194,19 @@ export default function VisitProfile({ navigation }) {
         }}
       >
         <View style={styles.container}>
-          <Image
-            source={{ uri: targetUserData.storageProfileImageURL }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+          <View style={{ width: "49%" }}>
+            <TouchableOpacity
+              onPress={() => {
+                showInspectPicture(true);
+              }}
+            >
+              <Image
+                source={{ uri: targetUserData.storageProfileImageURL }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          </View>
           <View style={styles.detailsView}>
             <View style={{ height: "70%" }}>
               <Text style={styles.displayNameText}>
@@ -227,7 +260,6 @@ export default function VisitProfile({ navigation }) {
             borderRadius: 5,
             minHeight: 100,
             marginBottom: 5,
-
           }}
         >
           <Text style={{ color: Theme.color, marginTop: 5 }}>

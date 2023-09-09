@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import { useState } from "react";
-import { Avatar, List } from "react-native-paper";
+import { Avatar, IconButton, List } from "react-native-paper";
 import { useFocusEffect, useNavigation } from "@react-navigation/core";
 import { ThemeContext } from "../Theme";
 import { useContext } from "react";
@@ -53,6 +53,16 @@ export default function ParticipantsPage(props) {
 
   return (
     <View>
+      <View style={{flexDirection:'row'}}>
+      <IconButton
+      onPress={backAction}
+      style={{height:25}}
+      icon="arrow-left"
+      iconColor={Theme.softColor}
+      
+      />
+      <Text style={{fontSize:15,padding:8,color:Theme.softColor}}>Etkinliklere dön</Text>
+      </View>
       <ScrollView style={styles.scrollView}>
         <View>
           {users.map((user, index) => (

@@ -54,18 +54,20 @@ export default function HomeScreen({ navigation }) {
     <>
       <Tab.Navigator
         screenOptions={{
-          // tabBarActiveBackgroundColor:'green',
+          tabBarIconStyle: { borderRadius: 5 },
+          tabBarActiveBackgroundColor: Theme.tabBar,
+          
           tabBarInactiveTintColor: Theme.tabBarIcon,
           tabBarActiveTintColor: Theme.tabBarIconActive,
           headerShown: false,
           tabBarStyle: {
             borderTopWidth: 0,
-            backgroundColor: Theme.tabBar,
-            height: 35,
+            backgroundColor: "transparent",
+            height: 50,
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
           },
-          tabBarShowLabel: false,
+          tabBarShowLabel: true,
         }}
         style={{ backgroundColor: "black" }}
         initialRouteName="Search"

@@ -113,7 +113,7 @@ export default function SignUp({ navigation, route }) {
           <Button
             style={{
               marginTop: 20,
-              backgroundColor: "#0000ff44",
+              backgroundColor: Theme.buttonPrimary,
               borderRadius: 5,
             }}
             mode="contained-tonal"
@@ -125,7 +125,7 @@ export default function SignUp({ navigation, route }) {
           </Button>
 
           <Button
-            rippleColor="#0000ff44"
+            rippleColor={Theme.component}
             style={{
               marginTop: 10,
               alignItems: "flex-end",

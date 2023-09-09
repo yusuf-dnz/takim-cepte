@@ -12,19 +12,25 @@ const Themes = {
 };
 
 export let theme = {
-  color: "white",
-  softColor: "#eeeeee77",
-  backgroundColor: "#0b2027",
-  component: "#3c6e7155",
-  tabBar: "#3c6e71",
-  topBar: "#3c6e71",
+  color: "#fff",
+  softColor: "#d3d3d3",
+  backgroundColor: "#13315c",
+  component: "#1b4965",
+  tabBar: "#bb9457",
+  topBar: "transparent",
   tabBarIconActive: "white",
   tabBarIcon: "#ccc",
-  modalColor: "#0b2027",
+  modalColor: "#1b4965fa",
   modalPressable: "#3c6e7155",
   senderBubble: "#3c6e71",
   receiverBubble: "#eeeeee",
   cardShadow:"#3c6e71",
+  secondaryContainer:"#dda15e",
+  danger:"red",
+  buttonPrimary:"#415a77",
+  cardStart:"#8da9c4",
+  cardMiddle:"#eef4ed",
+  cardEnd:"transparent",
 };
 
 export function selectTheme(x) {

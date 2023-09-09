@@ -116,7 +116,8 @@ export default function Search({ navigation }) {
     linearGradient: {
       flex: 1,
       zIndex:1,
-      height:null,
+      width:"100%",
+      height:40,
       marginBottom:-27,
       borderTopLeftRadius:5,
       borderTopRightRadius:5,
@@ -127,7 +128,7 @@ export default function Search({ navigation }) {
   return (
     <View style={{ backgroundColor: Theme.backgroundColor }}>
       <SafeAreaView>
-        <StaticTopBar text={"Topluluk"} />
+        {/* <StaticTopBar text={"Topluluk"} /> */}
         {selectedEvent == null ? (
           <ScrollView
             style={{ height: "100%" }}
@@ -146,7 +147,7 @@ export default function Search({ navigation }) {
                       <LinearGradient
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
-                        colors={["#38a3a5", "#0000ff33", "transparent"]}
+                        colors={[Theme.cardStart,Theme.cardMiddle , Theme.cardEnd]}
                         style={styles.linearGradient}
                       >
                       <Text style={styles.cardTitle}>{event.eventTitle} </Text>
