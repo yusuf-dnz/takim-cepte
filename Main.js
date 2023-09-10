@@ -20,6 +20,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { ThemeContext } from "./Theme";
 import { useContext } from "react";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
+import Settings from "./screens/settings";
 
 const Stack = createStackNavigator();
 
@@ -99,6 +100,11 @@ export default function Main() {
                 <Stack.Screen
                   name="ParticipantsPage"
                   component={ParticipantsPage}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Settings"
+                  component={Settings}
                   options={{ headerShown: false }}
                 />
               </>

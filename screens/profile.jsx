@@ -60,11 +60,11 @@ export default function Profile({ navigation }) {
   const [descriptionModal, showDescriptionModal] = useState(false);
 
   const forms = {
-    basketball: <EventForm.Basketball_Form />,
-    football: <EventForm.Football_Form />,
-    league_of_legends: <EventForm.LOL_Form />,
-    counter_strike_2: <EventForm.CS2_Form />,
-    valorant: <EventForm.Valorant_Form />,
+    basketball: <EventForm.Basketball_Form eventData={selectedEvent} />,
+    football: <EventForm.Football_Form eventData={selectedEvent}/>,
+    league_of_legends: <EventForm.LOL_Form eventData={selectedEvent}/>,
+    counter_strike_2: <EventForm.CS2_Form eventData={selectedEvent}/>,
+    valorant: <EventForm.Valorant_Form eventData={selectedEvent}/>,
   };
 
   const handleLogOut = () => {
@@ -179,29 +179,6 @@ export default function Profile({ navigation }) {
     showEventModal(!eventModal);
   };
 
-  const addEvent = async (title, id) => {
-    try {
-      const ref = doc(db, "users", CurrentUser.userId);
-      await updateDoc(ref, {
-        registeredEvents: arrayUnion(title),
-      });
-      CurrentUser.registeredEvents = [...CurrentUser.registeredEvents, title];
-      dispatch(setUserData(JSON.stringify(CurrentUser)));
-    } catch (error) {
-      console.error("Hata oluştu:", error);
-      console.error("Hatanın detayı:", error.stack);
-    }
-
-    try {
-      await setDoc(
-        doc(db, `events/${id}/participants`, CurrentUser.userId),
-        {}
-      );
-    } catch (error) {
-      console.log(" setdoc: ", error);
-    }
-  };
-
   const uriToBlob = (uri) => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -274,6 +251,8 @@ export default function Profile({ navigation }) {
       borderRadius: 20,
       width: "100%",
       height: "100%",
+      borderWidth:2,
+      borderColor:Theme.secondaryContainer
     },
     displayNameText: {
       color: Theme.color,
@@ -294,6 +273,7 @@ export default function Profile({ navigation }) {
       padding: 5,
       flexDirection: "row",
       backgroundColor: Theme.component,
+      
     },
     logOutView: {
       alignItems: "flex-end",
@@ -303,14 +283,20 @@ export default function Profile({ navigation }) {
       backgroundColor: "#ff0000",
       width: 100,
       borderRadius: 10,
+      position:"absolute",
+      bottom:10,
+      right:0,
     },
 
     bioView: {
       paddingHorizontal: 10,
-      backgroundColor: Theme.component,
+      marginTop:20,
+      backgroundColor: "transparent",
       borderRadius: 5,
       minHeight: 100,
       marginTop: 5,
+      borderWidth:2,
+      borderColor: Theme.secondaryContainer,
     },
     eventBadges: {
       height: 50,
@@ -389,7 +375,7 @@ export default function Profile({ navigation }) {
             />
 
             <IconButton
-              style={{ marginTop: "10%", backgroundColor: "red" }}
+              style={{ marginTop: "10%", backgroundColor: Theme.secondaryContainer }}
               icon="image"
               iconColor="white"
               onPress={pickImage}
@@ -397,7 +383,7 @@ export default function Profile({ navigation }) {
           </View>
         </Modal>
 
-        <ScrollView style={{ marginBottom: 50, padding: 5 }}>
+        <ScrollView style={{ marginBottom: 50, padding: 5, height:"100%" }}>
           <View style={styles.container}>
             <View style={{ width: "49%" }}>
               <TouchableOpacity
@@ -414,6 +400,16 @@ export default function Profile({ navigation }) {
             </View>
 
             <View style={styles.detailsView}>
+              <IconButton
+              icon="cog-outline"
+              iconColor={Theme.color}
+              onPress={()=> navigation.navigate("Settings")}
+              style={{
+                position:"absolute",
+                right:0,
+                top:0,
+            }}
+              />
               <Text style={styles.displayNameText}>
                 {CurrentUser?.displayName}
               </Text>
@@ -459,12 +455,13 @@ export default function Profile({ navigation }) {
           </View>
 
           <View style={styles.bioView}>
+            <Divider/>
             {CurrentUser?.userDescription ? (
               <Text style={{ color: Theme.color, marginTop: 5 }}>
                 {CurrentUser.userDescription}
               </Text>
             ) : (
-              <Text style={{ color: "gray", marginTop: 5 }}>
+              <Text style={{ color: Theme.softColor, marginTop: 5 }}>
                 Henüz açıklama eklemediniz.
               </Text>
             )}
@@ -473,14 +470,13 @@ export default function Profile({ navigation }) {
                 position: "absolute",
                 bottom: 0,
                 right: 0,
-                alignContent: "flex-end",
               }}
             >
               <IconButton
                 onPress={() => showDescriptionModal(!descriptionModal)}
                 icon="pencil"
                 iconColor={Theme.color}
-                style={{}}
+                style={{height:25}}
               />
             </View>
           </View>
@@ -643,19 +639,9 @@ export default function Profile({ navigation }) {
               </View>
             </View>
           </Modal>
-          <View style={styles.logOutView}>
-            <Button
-              style={styles.logOutButton}
-              onPress={handleLogOut}
-              icon="account-lock"
-              title="Log Out"
-              mode="contained"
-              touchSoundDisabled={true}
-            >
-              Log Out
-            </Button>
-          </View>
+            
         </ScrollView>
+        
       </SafeAreaView>
     </View>
   );

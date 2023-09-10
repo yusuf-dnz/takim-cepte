@@ -117,8 +117,8 @@ export default function Search({ navigation }) {
       flex: 1,
       zIndex:1,
       width:"100%",
-      height:40,
-      marginBottom:-27,
+      height:25,
+      marginBottom:-10,
       borderTopLeftRadius:5,
       borderTopRightRadius:5,
       

@@ -74,7 +74,7 @@ export default function ParticipantsPage(props) {
                   borderRadius: 5,
                   backgroundColor: Theme.component,
                 }}
-                title={user.displayName}
+                title={"@"+user.userName}
                 titleStyle={{ color: Theme.color }}
                 description={user.userDescription}
                 descriptionStyle={{ color: Theme.color }}

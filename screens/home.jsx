@@ -61,6 +61,7 @@ export default function HomeScreen({ navigation }) {
           tabBarActiveTintColor: Theme.tabBarIconActive,
           headerShown: false,
           tabBarStyle: {
+            shadowColor:"transparent",
             borderTopWidth: 0,
             backgroundColor: "transparent",
             height: 50,
@@ -76,7 +77,7 @@ export default function HomeScreen({ navigation }) {
         labeled={false}
       >
         <Tab.Screen
-          name="ChatList"
+          name="Mesajlar"
           options={{
             tabBarBadge: msgCount !== 0 ? msgCount : null,
             tabBarBadgeStyle: {
@@ -92,7 +93,7 @@ export default function HomeScreen({ navigation }) {
         />
 
         <Tab.Screen
-          name="Search"
+          name="Topluluk"
           options={{
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons color={color} name="earth" size={26} />
@@ -102,7 +103,7 @@ export default function HomeScreen({ navigation }) {
         />
 
         <Tab.Screen
-          name="Profile"
+          name="Profil"
           options={{
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons

@@ -104,7 +104,7 @@ export default function ChatList({ navigation }) {
         unreadMessages: unreadCounter,
         chatID: x.id,
         messages: x.data().messages,
-        targetUserName: docSnap.data().displayName,
+        targetUserName: docSnap.data().userName,
         targetUserImage: docSnap.data().storageProfileImageURL,
       };
 
@@ -135,14 +135,14 @@ export default function ChatList({ navigation }) {
               <>
                 <View
                   style={{
-                    marginTop:"100%",
+                    marginTop:"80%",
                     display: "flex",
                     alignItems: "center",
                     height:"100%"
                   }}
                 >
                   <Text style={{color:Theme.color}}>Henüz mesajın yok! </Text>
-                  <Text style={{color:Theme.color}}>Etkinlikler ve keşfeten insanlarla tanış. </Text>
+                  <Text style={{color:Theme.color}}>Etkinlikler ve keşfetten sohbet başlat. </Text>
                 </View>
               </>
             ) : (
@@ -155,7 +155,7 @@ export default function ChatList({ navigation }) {
                         borderRadius: 5,
                         marginVertical: 5,
                       }}
-                      title={chat.targetUserName}
+                      title={"@"+chat.targetUserName}
                       titleStyle={{ color: Theme.color }}
                       description={(chat.messages ?? [])[0]?.text ?? undefined}
                       descriptionStyle={{ color: Theme.color }}

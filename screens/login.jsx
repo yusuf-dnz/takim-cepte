@@ -19,6 +19,7 @@ import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
 import { ThemeContext } from "../Theme";
 import { useContext } from "react";
+import Toast from "react-native-toast-message";
 
 export default function LogIn({ navigation, route }) {
   const Theme = useContext(ThemeContext);
@@ -28,6 +29,15 @@ export default function LogIn({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState("eye");
 
+  const showToast = (text1, text2) => {
+    Toast.show({
+      position: "bottom",
+      type: "error",
+      text1: text1,
+      text2: text2,
+      visibilityTime: 3000,
+    });
+  };
 
   const togglePasswordVisibility = () => {
     if (!showPassword) setPasswordIcon("eye-off");
@@ -39,7 +49,35 @@ export default function LogIn({ navigation, route }) {
     try {
       const { user } = await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      console.log("Giriş Hatası: ", error);
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      switch (errorCode) {
+        case "auth/wrong-password":
+          showToast("Giriş hatası", "Email ve şifre kontrol edin");
+          break;
+
+        case "auth/user-not-found":
+          showToast(
+            "Kullanıcı bulunamadı!",
+            "Yeni hesap oluşturmayı deneyebilirsin."
+          );
+          break;
+
+        case "auth/invalid-email":
+          showToast(
+            "Email Hatası!",
+            "Email adresiniz geçerli formatda olmalı."
+          );
+          break;
+        case "auth/too-many-requests":
+          showToast(
+            "Çok fazla yanlış deneme yapıldı!",
+            "5 dakika sonra tekrar deneyin."
+          );
+        break;
+        default:
+          console.error(errorMessage);
+      }
     }
   };
 

@@ -11,6 +11,7 @@ import { auth, db } from "../firebase";
 import { Timestamp } from "firebase/firestore";
 import { useContext } from "react";
 import { ThemeContext } from "../Theme";
+import Toast from "react-native-toast-message";
 
 export default function SignUp({ navigation, route }) {
   const Theme = useContext(ThemeContext);
@@ -21,6 +22,15 @@ export default function SignUp({ navigation, route }) {
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [passwordIcon, setPasswordIcon] = useState("eye");
 
+  const showToast = (text1, text2) => {
+    Toast.show({
+      position: "bottom",
+      type: "error",
+      text1: text1,
+      text2: text2,
+      visibilityTime: 3000,
+    });
+  };
 
   const togglePasswordVisibility = () => {
     if (!showPassword) setPasswordIcon("eye-off");
@@ -30,18 +40,43 @@ export default function SignUp({ navigation, route }) {
 
   const handleSignUp = async () => {
     if (password != rePassword) {
-      console.warn("şifre eşleşmedi kontrol et");
+      showToast("Şifre eşleşmedi!", " ");
       setPasswordMatch(false);
     } else {
       setPasswordMatch(true);
       try {
+        showToast("Hesap oluşturuluyor", " ");
+
         const { user } = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         );
       } catch (error) {
-        console.log(error);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        switch (errorCode) {
+          case "auth/email-already-in-use":
+            showToast(
+              "Email zaten kullanımda",
+              " Giriş sayfasını ziyaret edin"
+            );
+            break;
+
+          case "auth/weak-password":
+            showToast("Parola Hatası!", "Parola minimum 6 karakter olmalı.");
+            break;
+
+          case "auth/invalid-email":
+            showToast(
+              "Email Hatası!",
+              "Email adresiniz geçerli formatda olmalı."
+            );
+            break;
+
+          default:
+            console.error(errorMessage);
+        }
       }
     }
   };
@@ -113,7 +148,7 @@ export default function SignUp({ navigation, route }) {
           <Button
             style={{
               marginTop: 20,
-              backgroundColor: Theme.buttonPrimary,
+              backgroundColor: Theme.secondaryContainer,
               borderRadius: 5,
             }}
             mode="contained-tonal"

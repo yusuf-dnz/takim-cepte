@@ -22,14 +22,14 @@ export let theme = {
   tabBarIcon: "#ccc",
   modalColor: "#1b4965fa",
   modalPressable: "#3c6e7155",
-  senderBubble: "#3c6e71",
+  senderBubble: "#dda15e",
   receiverBubble: "#eeeeee",
   cardShadow:"#3c6e71",
   secondaryContainer:"#dda15e",
   danger:"red",
   buttonPrimary:"#415a77",
-  cardStart:"#8da9c4",
-  cardMiddle:"#eef4ed",
+  cardStart:"#dda15e",
+  cardMiddle:"#dda15eaa",
   cardEnd:"transparent",
 };
 

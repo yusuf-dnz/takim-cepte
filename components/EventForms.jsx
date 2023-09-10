@@ -3,8 +3,34 @@ import React, { useContext } from "react";
 import { IconButton, TextInput } from "react-native-paper";
 import { ThemeContext, theme } from "../Theme";
 import SelectDropdown from "react-native-select-dropdown";
+import { useDispatch, useSelector } from "react-redux";
+import { db } from "../firebase";
+import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
+import { setUserData } from "../redux/authentication";
 
-export function Football_Form() {
+const addEvent = async (title, eventId, authId, data) => {
+  try {
+    const ref = doc(db, "users", authId);
+    await updateDoc(ref, {
+      registeredEvents: arrayUnion(title),
+    });
+
+  } catch (error) {
+    console.error("Hata oluştu:", error);
+    console.error("Hatanın detayı:", error.stack);
+  }
+
+  try {
+    await setDoc(doc(db, `events/${eventId}/participants`, authId), data);
+  } catch (error) {
+    console.log(" setdoc: ", error);
+  }
+};
+
+export function Football_Form(props) {
+  const dispatch = useDispatch();
+  let CurrentUser = useSelector((state) => state.authStatus.userData);
+  const authId = useSelector((state) => state.authStatus.authId);
   const formData = {
     height: null,
     weight: null,
@@ -23,38 +49,45 @@ export function Football_Form() {
         Etkileşim artırmak için detay girin
       </Text>
 
-      <TextInput
-        maxLength={3}
-        style={{ width: "50%" }}
-        mode="outlined"
-        keyboardType="numeric"
-        placeholder="Kilo"
-        right={<TextInput.Affix  text="kg" />}
-        onChangeText={(num) => {
-          (formData.weight = num), console.log("hey");
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+          width: "100%",
         }}
-        value={formData.weight}
-      />
-      <TextInput
-        maxLength={3}
-        style={{ width: "50%" }}
-        mode="outlined"
-        keyboardType="numeric"
-        placeholder="Boy"
-        right={<TextInput.Affix  text="cm" />}
-        onChangeText={(num) => {
-            (formData.height = num);
+      >
+        <TextInput
+          maxLength={3}
+          style={{ width: "45%" }}
+          mode="outlined"
+          keyboardType="numeric"
+          placeholder="Kilo"
+          right={<TextInput.Affix text="kg" />}
+          onChangeText={(num) => {
+            (formData.weight = num) ;
           }}
-        value={formData.height}
-
-      />
+          value={formData.weight}
+        />
+        <TextInput
+          maxLength={3}
+          style={{ width: "45%" }}
+          mode="outlined"
+          keyboardType="numeric"
+          placeholder="Boy"
+          right={<TextInput.Affix text="cm" />}
+          onChangeText={(num) => {
+            formData.height = num;
+          }}
+          value={formData.height}
+        />
+      </View>
 
       <SelectDropdown
         defaultButtonText="Mevki seçebilirsin!"
-        buttonStyle={{ width: "100%", marginVertical: 5 }}
+        buttonStyle={{ width: "100%", marginVertical: 5, borderRadius: 5 }}
         data={positions}
         onSelect={(selectedItem, index) => {
-          (formData.position = selectedItem), console.log(formData);
+          (formData.position = selectedItem);
         }}
         buttonTextAfterSelection={(selectedItem, index) => {
           return selectedItem;
@@ -67,7 +100,16 @@ export function Football_Form() {
         style={{}}
         icon="check"
         iconColor={theme.color}
-        onPress={() => console.log("press")}
+        onPress={() => {
+          addEvent(
+            props.eventData.eventTitle,
+            props.eventData.eventId,
+            authId,
+            formData
+          ),
+          CurrentUser.registeredEvents = [...CurrentUser.registeredEvents, props.eventData.eventTitle];
+          dispatch(setUserData(JSON.stringify(CurrentUser)));
+        }}
       />
     </View>
   );

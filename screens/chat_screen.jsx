@@ -4,7 +4,13 @@ import { auth, db } from "../firebase";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useRoute } from "@react-navigation/core";
-import { Timestamp, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  Timestamp,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import {
   Bubble,
   Composer,
@@ -67,24 +73,28 @@ export default function ChatScreen({ navigation }) {
         {...props}
         optionTintColor={{}}
         containerStyle={{
-          backgroundColor: "#00000055",
-          borderTopColor: "red",
+          backgroundColor: Theme.backgroundColor,
+          borderTopColor: Theme.secondaryContainer,
         }}
       />
     );
   }
 
   function renderSend(props) {
-    return <Send {...props} label={"    "} 
-    sendButtonProps={{
-      style:{
-        backgroundColor:Theme.senderBubble,
-        margin:5,
-        marginRight:10,
-        borderRadius:20,
-      }
-    }}
-    />;
+    return (
+      <Send
+        {...props}
+        label={"    "}
+        sendButtonProps={{
+          style: {
+            backgroundColor: Theme.senderBubble,
+            margin: 5,
+            marginRight: 10,
+            borderRadius: 20,
+          },
+        }}
+      />
+    );
   }
   renderBubble = (props) => {
     return (
@@ -116,7 +126,7 @@ export default function ChatScreen({ navigation }) {
       // Kullanıcı geri tuşuna bastığında veya uygulamadan çıktığında
       // Firebase'e veriyi gönderme işlemini burada yapabilirsiniz.
       updateLastView();
-       // false döndürerek geri tuşunun varsayılan işlevini sürdürebilirsiniz.
+      // false döndürerek geri tuşunun varsayılan işlevini sürdürebilirsiniz.
     };
 
     const backHandler = BackHandler.addEventListener(
@@ -130,9 +140,9 @@ export default function ChatScreen({ navigation }) {
   const styles = StyleSheet.create({
     header: {
       flexDirection: "row",
-      marginTop:4,
-      borderBottomWidth:0.5,
-      borderBottomColor:'red'
+      marginTop: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: Theme.secondaryContainer,
     },
   });
 
@@ -182,5 +192,3 @@ export default function ChatScreen({ navigation }) {
     </React.Fragment>
   );
 }
-
-

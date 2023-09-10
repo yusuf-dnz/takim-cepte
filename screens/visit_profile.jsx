@@ -117,21 +117,27 @@ export default function VisitProfile({ navigation }) {
     regEvent();
   }, []);
 
+  const handleGoBack = () => {
+    // Geri gitme işlemi
+    navigation.goBack();
+  };
+
   const styles = StyleSheet.create({
     container: {
       width: null,
       height: Dimensions.get("window").width / 2,
       overflow: "hidden",
       backgroundColor: "transparent",
-      flexDirection: "row",
-      justifyContent: "space-between",
       marginVertical: 5,
     },
     detailsView: {
+      position: "absolute",
+      bottom: 10,
+      right: 10,
       padding: 10,
       borderRadius: 20,
-      width: "49%",
-      height: null,
+      width: 250,
+      height: 80,
       justifyContent: "center",
       backgroundColor: Theme.component,
     },
@@ -151,6 +157,7 @@ export default function VisitProfile({ navigation }) {
       fontSize: 12,
     },
     registeredEvents: {
+      marginVertical: 5,
       width: "100%",
       borderRadius: 5,
       height: 60,
@@ -163,6 +170,12 @@ export default function VisitProfile({ navigation }) {
 
   return (
     <SafeAreaView>
+      <IconButton
+            icon="arrow-left"
+            iconColor={Theme.color}
+            onPress={handleGoBack}
+            style={{height:20}}
+          />
       <Modal
         animationType="fade"
         transparent={false}
@@ -193,22 +206,21 @@ export default function VisitProfile({ navigation }) {
           padding: 5,
         }}
       >
-        <View style={styles.container}>
-          <View style={{ width: "49%" }}>
-            <TouchableOpacity
-              onPress={() => {
-                showInspectPicture(true);
-              }}
-            >
-              <Image
-                source={{ uri: targetUserData.storageProfileImageURL }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            </TouchableOpacity>
-          </View>
+        <View style={{ marginBottom: 5,borderWidth:2,borderRadius:20,borderColor:Theme.secondaryContainer }}>
+          <TouchableOpacity
+            style={{ height: Dimensions.get("window").width  }}
+            onPress={() => {
+              showInspectPicture(true);
+            }}
+          >
+            <Image
+              source={{ uri: targetUserData.storageProfileImageURL }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
           <View style={styles.detailsView}>
-            <View style={{ height: "70%" }}>
+            <View style={{}}>
               <Text style={styles.displayNameText}>
                 {targetUserData.displayName}
               </Text>
@@ -221,27 +233,26 @@ export default function VisitProfile({ navigation }) {
                 {targetUserData.cities ?? "..."}
               </Text>
             </View>
-            <View
+
+            <IconButton
+              icon="chat"
+              iconColor="white"
+              size={35}
               style={{
-                alignItems: "flex-end",
-                marginRight: 10,
-                zIndex: 2,
+                backgroundColor: "red",
+                position: "absolute",
+                right: 10,
               }}
-            >
-              <IconButton
-                icon="chat"
-                iconColor="white"
-                size={35}
-                style={{
-                  backgroundColor: "red",
-                  borderRadius: 10,
-                  alignItems: "center",
-                }}
-                onPress={() => createChat(targetUserData.userId)}
-              />
-            </View>
+              onPress={() => createChat(targetUserData.userId)}
+            />
           </View>
         </View>
+        {/* <View style={styles.container}> */}
+        {/* <View style={{ }}>
+            
+          </View> */}
+
+        {/* </View> */}
 
         {/* <View style={styles.container}>
           <Image
@@ -251,24 +262,6 @@ export default function VisitProfile({ navigation }) {
           />
           
         </View> */}
-
-        {/* Açıklama alanı */}
-        <View
-          style={{
-            padding: 10,
-            backgroundColor: Theme.component,
-            borderRadius: 5,
-            minHeight: 100,
-            marginBottom: 5,
-          }}
-        >
-          <Text style={{ color: Theme.color, marginTop: 5 }}>
-            {targetUserData.userDescription
-              ? targetUserData.userDescription
-              : "..."}
-          </Text>
-        </View>
-
         <View style={styles.registeredEvents}>
           <ScrollView horizontal={true}>
             {events?.map((event, index) => (
@@ -282,6 +275,24 @@ export default function VisitProfile({ navigation }) {
               </React.Fragment>
             ))}
           </ScrollView>
+        </View>
+        {/* Açıklama alanı */}
+        <View
+          style={{
+            padding: 10,
+            backgroundColor: Theme.backgroundColor,
+            borderWidth: 2,
+            borderColor: Theme.secondaryContainer,
+            borderRadius: 5,
+            minHeight: 100,
+            marginVertical: 5,
+          }}
+        >
+          <Text style={{ color: Theme.color, marginTop: 5 }}>
+            {targetUserData.userDescription
+              ? targetUserData.userDescription
+              : "..."}
+          </Text>
         </View>
 
         <Text style={{ textAlign: "right", color: Theme.color, margin: 10 }}>
