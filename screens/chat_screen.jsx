@@ -3,9 +3,10 @@ import React, { useCallback } from "react";
 import { auth, db } from "../firebase";
 import { useState } from "react";
 import { useEffect } from "react";
-import { useRoute } from "@react-navigation/core";
+import { useFocusEffect, useRoute } from "@react-navigation/core";
 import {
   Timestamp,
+  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -24,37 +25,41 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton, Avatar } from "react-native-paper";
 import { useContext } from "react";
 import { ThemeContext } from "../Theme";
+import { useSelector } from "react-redux";
 
 export default function ChatScreen({ navigation }) {
   const Theme = useContext(ThemeContext);
-
   const route = useRoute();
+
+  const userID = auth.currentUser.uid;
+
   const chatID = route.params.chatId;
   const targetUserName = route.params.targetUserName;
   const targetUserImage = route.params.targetUserImage;
-  const userID = auth.currentUser.uid;
+  const [messages, setMessages] = useState([])
 
-  const [userProfileData, setUserProfileData] = useState({});
-  useEffect(() => {
-    const getUserProfile = async () => {
-      const docRef = doc(db, "users", userID);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setUserProfileData(docSnap.data());
-      } else {
-        console.log("No such document!");
-      }
-    };
-    getUserProfile();
-  }, []);
+  const chat = useSelector((state) => state.msgCounter.chats[chatID].messages);
 
-  const [messages, setMessages] = useState([]);
+  function timestampToDate(timestampData) {
+    const milliseconds = timestampData.seconds * 1000 + Math.floor(timestampData.nanoseconds / 1000000);
+    return Timestamp.fromMillis(milliseconds).toDate();
+  }
+
+
+
 
   useEffect(() => {
-    const messages = onSnapshot(doc(db, "chats", chatID), (doc) => {
-      setMessages(doc.data()?.messages ?? []);
-    });
-  }, [chatID]);
+
+    if (chat?.length) {
+      setMessages(
+        chat.map((element) => ({
+          ...element,
+          createdAt: timestampToDate(element.createdAt),
+        })
+        ))
+    }
+  }, [chat])
+
 
   const onSend = async (m = []) => {
     const docRef = doc(db, "chats", chatID);
@@ -67,14 +72,16 @@ export default function ChatScreen({ navigation }) {
     );
   };
 
+
   function renderInputToolbar(props) {
     return (
       <InputToolbar
         {...props}
-        optionTintColor={{}}
+
         containerStyle={{
           backgroundColor: Theme.backgroundColor,
-          borderTopColor: Theme.secondaryContainer,
+          borderTopColor: Theme.senderBubble,
+          borderTopWidth: 1,
         }}
       />
     );
@@ -82,18 +89,24 @@ export default function ChatScreen({ navigation }) {
 
   function renderSend(props) {
     return (
-      <Send
-        {...props}
-        label={"    "}
-        sendButtonProps={{
-          style: {
-            backgroundColor: Theme.senderBubble,
-            margin: 5,
-            marginRight: 10,
-            borderRadius: 20,
-          },
-        }}
-      />
+      <View style={{}}>
+        <IconButton
+
+          size={24}
+          style={{ marginBottom: -30 }}
+          icon="arrow-right-bold"
+          iconColor={Theme.senderBubble}
+        />
+        <Send
+          {...props}
+          label={"     "}
+          sendButtonProps={{
+            style: {
+            },
+          }}
+        />
+      </View>
+
     );
   }
   renderBubble = (props) => {
@@ -113,29 +126,27 @@ export default function ChatScreen({ navigation }) {
   };
 
   const updateLastView = async () => {
+    const chatRef = doc(db, "chats", chatID);
     const date = new Date();
     const lastView = Timestamp.fromDate(date);
-    const chatRef = doc(db, "chats", chatID);
     await updateDoc(chatRef, {
       [userID]: lastView,
-    });
+    }).then(navigation.navigate("HomeScreen"));
   };
 
-  useEffect(() => {
-    const backAction = () => {
-      // Kullanıcı geri tuşuna bastığında veya uygulamadan çıktığında
-      // Firebase'e veriyi gönderme işlemini burada yapabilirsiniz.
-      updateLastView();
-      // false döndürerek geri tuşunun varsayılan işlevini sürdürebilirsiniz.
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        updateLastView
+      );
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
+      return () => {
+        backHandler.remove();
+      };
+    }, [])
+  );
 
-    return () => backHandler.remove(); // Temizleme işlemi
-  }, []);
 
   const styles = StyleSheet.create({
     header: {
@@ -155,7 +166,7 @@ export default function ChatScreen({ navigation }) {
             iconColor="white"
             size={20}
             onPress={() => {
-              navigation.navigate("HomeScreen");
+
               updateLastView();
             }}
           />
@@ -173,19 +184,15 @@ export default function ChatScreen({ navigation }) {
           </Text>
         </View>
         <GiftedChat
+          renderAvatar={() => <Avatar.Image size={36} source={{ uri: targetUserImage }} />}
           renderSend={renderSend}
           renderBubble={this.renderBubble}
           renderInputToolbar={renderInputToolbar}
           textInputProps={{ color: "white" }}
-          alwaysShowSend={true}
-          messages={messages.map((x) => ({
-            ...x,
-            createdAt: x.createdAt?.toDate(),
-          }))}
-          onSend={(messages) => onSend(messages)}
+          messages={messages}
+          onSend={(msg) => onSend(msg)}
           user={{
             _id: userID,
-            avatar: userProfileData.storageProfileImageURL,
           }}
         />
       </SafeAreaView>

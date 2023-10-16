@@ -44,6 +44,32 @@ export default function VisitProfile({ navigation }) {
   const route = useRoute();
   const targetUserData = route.params.targetUserData;
   const [inspectPicture, showInspectPicture] = useState(false);
+  const [eventDetail, showEventDetail] = useState(false);
+  const [eventData, setEventData] = useState([]);
+  const [selectedEventDetail, setSelectedEventDetail] = useState(null);
+
+  const getEventDetails = async (eventId) => {
+    const docRef = doc(db, `events/${eventId}/participants`, targetUserData.userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      setSelectedEventDetail(docSnap.data());
+    } else {
+      console.log("No EventDetail such document!");
+    }
+  };
+
+  useEffect(() => {
+    let eventData = [];
+    for (const key in selectedEventDetail) {
+      if (selectedEventDetail.hasOwnProperty(key)) {
+        const value = selectedEventDetail[key];
+        eventData.push({ key: key, value: value });
+      }
+    }
+    setEventData(eventData);
+  }, [selectedEventDetail]);
+
 
   const createChat = async (targetID) => {
     const date = new Date();
@@ -60,6 +86,7 @@ export default function VisitProfile({ navigation }) {
     if (querySnapshot.empty) {
       const create = await addDoc(collection(db, "chats"), {
         participants: [CurrentUser, targetID],
+        messages: [],
         [CurrentUser]: lastView,
         [targetID]: lastView,
       });
@@ -67,14 +94,14 @@ export default function VisitProfile({ navigation }) {
       console.log("chat oluşturuldu");
       navigation.navigate("ChatScreen", {
         chatId: create.id,
-        targetUserName: targetUserData.displayName,
+        targetUserName: targetUserData.userName,
         targetUserImage: targetUserData.storageProfileImageURL,
       });
     } else {
       console.log(querySnapshot.docs[0].id);
       navigation.navigate("ChatScreen", {
         chatId: querySnapshot.docs[0].id,
-        targetUserName: targetUserData.displayName,
+        targetUserName: targetUserData.userName,
         targetUserImage: targetUserData.storageProfileImageURL,
       });
     }
@@ -137,24 +164,24 @@ export default function VisitProfile({ navigation }) {
       padding: 10,
       borderRadius: 20,
       width: 250,
-      height: 80,
+      minHeight: 80,
       justifyContent: "center",
       backgroundColor: Theme.component,
     },
     image: {
-      borderRadius: 20,
+      borderRadius: 15,
       width: "100%",
       height: "100%",
     },
     displayNameText: {
       color: Theme.color,
       fontSize: 20,
-      marginBottom: 5,
+      maxWidth: 150,
     },
     detailTexts: {
       color: Theme.softColor,
-      marginBottom: 5,
       fontSize: 12,
+      maxWidth: 150
     },
     registeredEvents: {
       marginVertical: 5,
@@ -166,16 +193,39 @@ export default function VisitProfile({ navigation }) {
       backgroundColor: Theme.component,
       marginBottom: 5,
     },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 22,
+    },
+    modalView: {
+      margin: 20,
+      width: "80%",
+      maxHeight: "80%",
+
+      backgroundColor: Theme.modalColor,
+      borderRadius: 20,
+      padding: 10,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
   });
 
   return (
     <SafeAreaView>
       <IconButton
-            icon="arrow-left"
-            iconColor={Theme.color}
-            onPress={handleGoBack}
-            style={{height:20}}
-          />
+        icon="arrow-left"
+        iconColor={Theme.color}
+        onPress={handleGoBack}
+        style={{ height: 20 }}
+      />
       <Modal
         animationType="fade"
         transparent={false}
@@ -199,6 +249,53 @@ export default function VisitProfile({ navigation }) {
           />
         </View>
       </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={eventDetail}
+        onRequestClose={() => {
+          showEventDetail(!eventDetail);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <IconButton
+              icon="close-thick"
+              iconColor={Theme.danger}
+              onPress={() => {
+                showEventDetail(!eventDetail);
+              }}
+            />
+            <ScrollView style={{ width: "100%" }}>
+              <View style={{ alignItems: "center" }}>
+
+                <View style={{ width: "70%" }}>
+                  {eventData?.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-around",
+                          borderRadius: 5,
+                          backgroundColor: Theme.secondaryContainer,
+                          margin: 5,
+                        }}
+                      >
+                        <Text style={{ color: Theme.color, padding: 5, fontSize: 16 }}>
+                          {item.key.charAt(0).toUpperCase() + item.key.slice(1)} :
+                        </Text>
+                        <Text style={{ color: Theme.color, padding: 5, fontSize: 16 }}>{item.value}</Text>
+
+                      </View>
+                    </React.Fragment>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
       <ScrollView
         style={{
           backgroundColor: Theme.backgroundColor,
@@ -206,9 +303,9 @@ export default function VisitProfile({ navigation }) {
           padding: 5,
         }}
       >
-        <View style={{ marginBottom: 5,borderWidth:2,borderRadius:20,borderColor:Theme.secondaryContainer }}>
+        <View style={{ marginBottom: 5, borderWidth: 2, borderRadius: 17, borderColor: Theme.secondaryContainer }}>
           <TouchableOpacity
-            style={{ height: Dimensions.get("window").width  }}
+            style={{ height: Dimensions.get("window").width }}
             onPress={() => {
               showInspectPicture(true);
             }}
@@ -220,14 +317,12 @@ export default function VisitProfile({ navigation }) {
             />
           </TouchableOpacity>
           <View style={styles.detailsView}>
-            <View style={{}}>
+            <View >
               <Text style={styles.displayNameText}>
-                {targetUserData.displayName}
+                @{targetUserData.userName}
               </Text>
-              <Text style={styles.detailTexts}>@{targetUserData.userName}</Text>
-              {/* <Text style={styles.detailTexts}>
-                Katılım: {formattedDate}
-              </Text> */}
+              <Text style={styles.detailTexts}>{targetUserData.displayName}</Text>
+
               <Text style={styles.detailTexts}>
                 {targetUserData.country} / {targetUserData.state} /{" "}
                 {targetUserData.cities ?? "..."}
@@ -247,31 +342,24 @@ export default function VisitProfile({ navigation }) {
             />
           </View>
         </View>
-        {/* <View style={styles.container}> */}
-        {/* <View style={{ }}>
-            
-          </View> */}
 
-        {/* </View> */}
-
-        {/* <View style={styles.container}>
-          <Image
-            source={{ uri: targetUserData.storageProfileImageURL }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          
-        </View> */}
         <View style={styles.registeredEvents}>
           <ScrollView horizontal={true}>
             {events?.map((event, index) => (
               <React.Fragment key={index}>
-                <Image
-                  style={{ width: 50, marginHorizontal: 5 }}
-                  source={{
-                    uri: event.eventIconURL,
-                  }}
-                />
+                <TouchableOpacity onPress={() => {
+                  showEventDetail(!eventDetail),
+                    getEventDetails(event.eventId)
+                }}>
+
+                  <Image
+                    style={{ width: 50, height: 50, marginHorizontal: 5 }}
+                    source={{
+                      uri: event.eventIconURL,
+                    }}
+                  />
+                </TouchableOpacity>
+
               </React.Fragment>
             ))}
           </ScrollView>

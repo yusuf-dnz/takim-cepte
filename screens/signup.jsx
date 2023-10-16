@@ -22,10 +22,10 @@ export default function SignUp({ navigation, route }) {
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [passwordIcon, setPasswordIcon] = useState("eye");
 
-  const showToast = (text1, text2) => {
+  const showToast = (text1, text2, state) => {
     Toast.show({
       position: "bottom",
-      type: "error",
+      type: state,
       text1: text1,
       text2: text2,
       visibilityTime: 3000,
@@ -40,12 +40,12 @@ export default function SignUp({ navigation, route }) {
 
   const handleSignUp = async () => {
     if (password != rePassword) {
-      showToast("Şifre eşleşmedi!", " ");
+      showToast("Şifre eşleşmedi!", " ", "error");
       setPasswordMatch(false);
     } else {
       setPasswordMatch(true);
       try {
-        showToast("Hesap oluşturuluyor", " ");
+        showToast("Hesap oluşturuluyor", " ", "success");
 
         const { user } = await createUserWithEmailAndPassword(
           auth,
@@ -59,18 +59,20 @@ export default function SignUp({ navigation, route }) {
           case "auth/email-already-in-use":
             showToast(
               "Email zaten kullanımda",
-              " Giriş sayfasını ziyaret edin"
+              " Giriş sayfasını ziyaret edin",
+              "error"
             );
             break;
 
           case "auth/weak-password":
-            showToast("Parola Hatası!", "Parola minimum 6 karakter olmalı.");
+            showToast("Parola Hatası!", "Parola minimum 6 karakter olmalı.", "error");
             break;
 
           case "auth/invalid-email":
             showToast(
               "Email Hatası!",
-              "Email adresiniz geçerli formatda olmalı."
+              "Email adresiniz geçerli formatda olmalı.",
+              "error"
             );
             break;
 

@@ -8,19 +8,20 @@ import VisitProfile from "./screens/visit_profile";
 import CreateProfile from "./screens/create_profile";
 import ParticipantsPage from "./screens/participants_page";
 
-import { View, Text, StyleSheet, Dimensions,  } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
-import { setAuthId, setUserData } from "./redux/authentication";
-import { doc, getDoc } from "firebase/firestore";
+import { deleteAuthData, setAuthId, setUserData } from "./redux/authentication";
 import { ThemeContext } from "./Theme";
 import { useContext } from "react";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
 import Settings from "./screens/settings";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { clearChatData, setChatData, updateMsgCounter } from "./redux/messages";
 
 const Stack = createStackNavigator();
 
@@ -35,11 +36,23 @@ export default function Main() {
       if (user) {
         dispatch(setAuthId(auth.currentUser.uid));
       } else {
-        // dispatch(setUserData(null));
-        dispatch(setAuthId(null));
+        console.log("çıkış");
+        clearStorage();
       }
     });
   }, []);
+
+  clearStorage = async () => {
+    console.log("global state temizleniyor...");
+    dispatch(deleteAuthData());
+    dispatch(clearChatData());
+    try {
+      await AsyncStorage.clear();
+      console.log("local storage clear");
+    } catch (error) {
+      console.log("Hata", error);
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -54,7 +67,7 @@ export default function Main() {
       <View
         style={{
           height: "100%",
-          paddingTop:40
+          paddingTop: 40,
         }}
       >
         <NavigationContainer

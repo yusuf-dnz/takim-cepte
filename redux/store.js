@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterReducer from "./messageCounter"
-import authReducer from "./authentication"
+import counterReducer from "./messages";
+import authReducer from "./authentication";
 
 export const store = configureStore({
-    reducer:{
-        msgCounter: counterReducer,
-        authStatus: authReducer,
-    },
+  reducer: {
+    msgCounter: counterReducer,
+    authStatus: authReducer,
+  },
 });

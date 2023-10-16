@@ -30,89 +30,60 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useDispatch } from "react-redux";
-import { updateMsgCounter } from "../redux/messageCounter";
+import { useDispatch, useSelector } from "react-redux";
+import { updateMsgCounter } from "../redux/messages";
 import { useContext } from "react";
 import { ThemeContext } from "../Theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 export default function ChatList({ navigation }) {
   const currentUser = auth.currentUser.uid; // AUTH VERİSİ ID
-  const [chats, setChats] = useState([]);
-  const [onSnap, setOnSnap] = useState([]);
-
   const Theme = useContext(ThemeContext);
 
-  let totalUnRead = 0;
   const dispatch = useDispatch();
+  const chats = useSelector((state) => state.msgCounter.chats);
+  const [chatAssets, setChatAssets] = useState([])
+  let chatIds = Object.keys(chats);
+
+
 
   useEffect(() => {
-    const docRef = query(
-      collection(db, "chats"),
-      where("participants", "array-contains", currentUser)
-    );
-    const unsub = onSnapshot(docRef, (querySnapshot) => {
-      console.log("ONSNAP ÇALIŞTI");
-      setChats([]);
-      setOnSnap(querySnapshot.docs);
+    let totalUnread = 0;
+    chatIds.forEach(element => {
+      if (chats[element].unreadCount > 0) { totalUnread++ }
     });
-    return () => {
-      unsub();
-    };
-  }, []);
+    dispatch(updateMsgCounter(totalUnread));
+  }, [chats])
+
+
 
   useEffect(() => {
-    totalUnRead = 0;
-    onSnap.map((doc) => {
-      let targetUser;
-      const chatData = doc;
-      const chatUsers = doc.data().participants;
-      if (chatUsers[0] == currentUser) {
-        targetUser = chatUsers[1];
-      } else targetUser = chatUsers[0];
-
-      createTargetChats(chatData, targetUser);
-    });
-    dispatch(updateMsgCounter(totalUnRead));
-  }, [onSnap]);
-
-  const createTargetChats = async (x, y) => {
-    let unreadCounter = 0;
-    const lastView = x.data()[currentUser];
-    const msgs = x.data().messages;
-
-    if (msgs && msgs.length > 0) {
-      for (const msg of msgs) {
-        const targetTS = msg.createdAt;
-
-        if (
-          lastView.seconds === targetTS.seconds &&
-          lastView.nanoseconds < targetTS.nanoseconds
-        ) {
-          unreadCounter++;
-        } else if (lastView.seconds < targetTS.seconds) {
-          unreadCounter++;
-        } else break;
+    getMultiple = async () => {
+      let values
+      try {
+        values = await AsyncStorage.multiGet(chatIds)
+      } catch (e) {
+        // read error
       }
+      setChatAssets(values)
+      // console.log(values)
     }
+    getMultiple();
+  }, [chats])
 
-    totalUnRead = totalUnRead + unreadCounter;
+  const [data, setData] = useState({});
+  useEffect(() => {
+    // console.log(chatAssets)
+    let obj = {};
+    chatAssets.forEach((x) => {
+      const key = x[0];
+      obj[key] = JSON.parse(x[1]);
+    })
+    setData(obj)
+  }, [chatAssets])
 
-    const docRef = doc(db, "users", y);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const newItem = {
-        unreadMessages: unreadCounter,
-        chatID: x.id,
-        messages: x.data().messages,
-        targetUserName: docSnap.data().userName,
-        targetUserImage: docSnap.data().storageProfileImageURL,
-      };
 
-      setChats((prevChats) => [...prevChats, newItem]);
-    } else {
-      console.log("No getTargetUser such document!");
-    }
-  };
 
   const updateLastView = async (targetChat) => {
     const date = new Date();
@@ -130,45 +101,34 @@ export default function ChatList({ navigation }) {
       >
         {/* <StaticTopBar text={"Konuşmalar"} /> */}
 
-        <ScrollView style={{ flex: 1, marginHorizontal: 10, marginBottom: 50 ,height:"100%",}}>
-            {!chats.length ? (
-              <>
-                <View
-                  style={{
-                    marginTop:"80%",
-                    display: "flex",
-                    alignItems: "center",
-                    height:"100%"
-                  }}
-                >
-                  <Text style={{color:Theme.color}}>Henüz mesajın yok! </Text>
-                  <Text style={{color:Theme.color}}>Etkinlikler ve keşfetten sohbet başlat. </Text>
-                </View>
-              </>
-            ) : (
-              <>
-                {chats.map((chat, index) => (
-                  <React.Fragment key={index}>
+        <ScrollView style={{ flex: 1, marginHorizontal: 10, marginBottom: 50, height: "100%", }}>
+          {/* <Text>{x}</Text> */}
+
+          {chatIds.length > 0 ? (
+            <>
+              {chatIds.map((id, index) => (
+                <React.Fragment key={index}>
+                  {chats[id].messages.length > 0 ? (
                     <List.Item
                       style={{
                         backgroundColor: Theme.component,
                         borderRadius: 5,
                         marginVertical: 5,
                       }}
-                      title={"@"+chat.targetUserName}
+                      title={"@" + data[id]?.userName}
                       titleStyle={{ color: Theme.color }}
-                      description={(chat.messages ?? [])[0]?.text ?? undefined}
+                      description={(chats[id].messages ?? [])[0]?.text ?? undefined}
                       descriptionStyle={{ color: Theme.color }}
                       left={() => (
                         <Avatar.Image
                           style={{ marginLeft: 5 }}
                           size={56}
-                          source={{ uri: chat.targetUserImage }}
+                          source={{ uri: data[id]?.userPicture }}
                         />
                       )}
                       right={() => (
                         <>
-                          {chat.unreadMessages !== 0 ? (
+                          {chats[id].unreadCount !== 0 ? (
                             <Badge
                               style={{
                                 position: "absolute",
@@ -177,24 +137,40 @@ export default function ChatList({ navigation }) {
                               }}
                               size={20}
                             >
-                              {chat.unreadMessages}
+                              {chats[id].unreadCount}
                             </Badge>
                           ) : null}
                         </>
                       )}
                       onPress={() => {
                         navigation.navigate("ChatScreen", {
-                          chatId: chat.chatID,
-                          targetUserName: chat.targetUserName,
-                          targetUserImage: chat.targetUserImage,
+                          chatId: id,
+                          targetUserName: data[id]?.userName,
+                          targetUserImage: data[id]?.userPicture,
                         });
-                        updateLastView(chat.chatID);
+                        updateLastView(id);
                       }}
                     />
-                  </React.Fragment>
-                ))}
-              </>
-            )}
+                  ) : (<>
+                  </>)}
+                </React.Fragment>
+              ))}
+            </>
+          ) : (
+            <>
+              <View
+                style={{
+                  marginTop: "80%",
+                  display: "flex",
+                  alignItems: "center",
+                  height: "100%"
+                }}
+              >
+                <Text style={{ color: Theme.color }}>Henüz mesajın yok! </Text>
+                <Text style={{ color: Theme.color }}>Etkinlikler ve keşfetten sohbet başlat. </Text>
+              </View>
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>

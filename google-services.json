@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "936682876365",
+    "firebase_url": "https://takimcepte-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "takimcepte",
+    "storage_bucket": "takimcepte.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936682876365:android:63c3d80515fbca72fda884",
+        "android_client_info": {
+          "package_name": "com.yuefi.TakimCepte"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936682876365-ron2moaf5m82ehfde618e9klnssgsq4e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1w_hRyZ7UmfjblIpZJnIMOwVPa2QWAss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936682876365-ron2moaf5m82ehfde618e9klnssgsq4e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -358,6 +358,7 @@ export default function CreateProfile({ navigation }) {
   }, [citiesData]);
   ////////////////////////////////////////////////////////
   const addProfileDetails = async () => {
+    //  setTimeout(async function(){
     if (
       !country ||
       !storageImageURL ||
@@ -398,6 +399,7 @@ export default function CreateProfile({ navigation }) {
     } catch (error) {
       console.log(error);
     }
+    //  },500);
   };
 
   const pickImage = async () => {
@@ -429,6 +431,13 @@ export default function CreateProfile({ navigation }) {
   const allowedPattern = /^[a-z0-9]*$/; // Sadece harf ve rakamlar izin veriliyor
 
   const handleInputChange = (newValue) => {
+
+    setNameIcon({
+      availableName: false,
+      color: "#4477CE",
+      icon: "reload",
+    });
+
     if (newValue == "") {
       setUniqueName(newValue);
       setNameIcon({
@@ -743,7 +752,7 @@ export default function CreateProfile({ navigation }) {
               style={{}}
               icon="arrow-left-bold"
               iconColor={Theme.color}
-              onPress={()=>setPage(false)}
+              onPress={() => setPage(false)}
             />
             <ScrollView style={{ padding: 10 }}>
               <View style={{ marginTop: "30%" }}>

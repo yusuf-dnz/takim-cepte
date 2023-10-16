@@ -53,15 +53,15 @@ export default function ParticipantsPage(props) {
 
   return (
     <View>
-      <View style={{flexDirection:'row'}}>
-      <IconButton
-      onPress={backAction}
-      style={{height:25}}
-      icon="arrow-left"
-      iconColor={Theme.softColor}
-      
-      />
-      <Text style={{fontSize:15,padding:8,color:Theme.softColor}}>Etkinliklere dön</Text>
+      <View style={{ flexDirection: 'row' }}>
+        <IconButton
+          onPress={backAction}
+          style={{ height: 25 }}
+          icon="arrow-left"
+          iconColor={Theme.softColor}
+
+        />
+        <Text style={{ fontSize: 15, padding: 8, color: Theme.softColor }}>Etkinliklere dön</Text>
       </View>
       <ScrollView style={styles.scrollView}>
         <View>
@@ -74,7 +74,7 @@ export default function ParticipantsPage(props) {
                   borderRadius: 5,
                   backgroundColor: Theme.component,
                 }}
-                title={"@"+user.userName}
+                title={"@" + user.userName}
                 titleStyle={{ color: Theme.color }}
                 description={user.userDescription}
                 descriptionStyle={{ color: Theme.color }}

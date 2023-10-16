@@ -35,23 +35,26 @@ import { signOut } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
-import { setAuthId, setUserData } from "../redux/authentication";
+import { setAuthId, setUserData, updateUserData } from "../redux/authentication";
 import { ThemeContext, theme } from "../Theme";
 import * as ImagePicker from "expo-image-picker";
 import { RenderHTML, RenderHTMLSource } from "react-native-render-html";
-import * as EventForm from "../components/EventForms";
+import EventForms, * as EventForm from "../components/EventForms";
 
 export default function Profile({ navigation }) {
   const dispatch = useDispatch();
   const Theme = useContext(ThemeContext);
   let CurrentUser = useSelector((state) => state.authStatus.userData);
+  let authId = useSelector((state) => state.authStatus.authId);
 
   const [eventModal, showEventModal] = useState(false);
   const [eventDetailModal, showEventDetailModal] = useState(false);
   const [allEvents, setAllEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEventDetail, setSelectedEventDetail] = useState(null);
 
   const [eventForm, setEventForm] = useState(false);
+  const [eventData, setEventData] = useState([]);
 
   const [inspectPicture, showInspectPicture] = useState(false);
   const [description, onChangeDescription] = useState(
@@ -59,32 +62,32 @@ export default function Profile({ navigation }) {
   );
   const [descriptionModal, showDescriptionModal] = useState(false);
 
-  const forms = {
-    basketball: <EventForm.Basketball_Form eventData={selectedEvent} />,
-    football: <EventForm.Football_Form eventData={selectedEvent}/>,
-    league_of_legends: <EventForm.LOL_Form eventData={selectedEvent}/>,
-    counter_strike_2: <EventForm.CS2_Form eventData={selectedEvent}/>,
-    valorant: <EventForm.Valorant_Form eventData={selectedEvent}/>,
+
+  const modalFunction = () => {
+    showEventModal(!eventModal);
   };
 
-  const handleLogOut = () => {
-    Alert.alert("Hesaptan çıkış yap...", "", [
-      {
-        text: "Hayır",
-        onPress: () => null,
-        style: "cancel",
-      },
-      {
-        text: "Evet",
-        onPress: async (e) => {
-          await signOut(auth);
-          // dispatch(setAuthId(null));
-          // dispatch(setUserData(null));
-          //// Main js de ayarlandı ancak güvenlik açısından kontrol et !!
-        },
-      },
-    ]);
+  const getEventDetails = async (eventId) => {
+    const docRef = doc(db, `events/${eventId}/participants`, authId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      setSelectedEventDetail(docSnap.data());
+    } else {
+      console.log("No EventDetail such document!");
+    }
   };
+
+  useEffect(() => {
+    let eventData = [];
+    for (const key in selectedEventDetail) {
+      if (selectedEventDetail.hasOwnProperty(key)) {
+        const value = selectedEventDetail[key];
+        eventData.push({ key: key, value: value });
+      }
+    }
+    setEventData(eventData);
+  }, [selectedEventDetail]);
 
   const deleteEvent = () => {
     Alert.alert("Etkinliği silmek üzeresin...", "Bilgeler silinecek!", [
@@ -118,8 +121,8 @@ export default function Profile({ navigation }) {
           let newArray = CurrentUser.registeredEvents.filter(
             (item) => item !== selectedEvent.eventTitle
           );
-          CurrentUser.registeredEvents = newArray;
-          dispatch(setUserData(JSON.stringify(CurrentUser)));
+          dispatch(updateUserData(JSON.stringify({ registeredEvents: newArray })));
+
         },
       },
     ]);
@@ -133,9 +136,9 @@ export default function Profile({ navigation }) {
       await updateDoc(ref, {
         userDescription: description,
       });
-    } catch (error) {}
-    CurrentUser.userDescription = description;
-    dispatch(setUserData(JSON.stringify(CurrentUser)));
+    } catch (error) { }
+    dispatch(updateUserData(JSON.stringify({ userDescription: description })));
+
     showDescriptionModal(!descriptionModal);
   };
   const firebaseTimestamp = CurrentUser?.createdDate.seconds * 1000;
@@ -224,8 +227,8 @@ export default function Profile({ navigation }) {
 
   useEffect(() => {
     if (storageImageURL !== null) {
-      CurrentUser.storageProfileImageURL = storageImageURL;
-      dispatch(setUserData(JSON.stringify(CurrentUser)));
+      dispatch(updateUserData(JSON.stringify({ storageProfileImageURL: storageImageURL })));
+
     }
   }, [storageImageURL]);
 
@@ -251,8 +254,8 @@ export default function Profile({ navigation }) {
       borderRadius: 20,
       width: "100%",
       height: "100%",
-      borderWidth:2,
-      borderColor:Theme.secondaryContainer
+      borderWidth: 2,
+      borderColor: Theme.secondaryContainer,
     },
     displayNameText: {
       color: Theme.color,
@@ -273,7 +276,6 @@ export default function Profile({ navigation }) {
       padding: 5,
       flexDirection: "row",
       backgroundColor: Theme.component,
-      
     },
     logOutView: {
       alignItems: "flex-end",
@@ -283,19 +285,19 @@ export default function Profile({ navigation }) {
       backgroundColor: "#ff0000",
       width: 100,
       borderRadius: 10,
-      position:"absolute",
-      bottom:10,
-      right:0,
+      position: "absolute",
+      bottom: 10,
+      right: 0,
     },
 
     bioView: {
       paddingHorizontal: 10,
-      marginTop:20,
+      marginTop: 20,
       backgroundColor: "transparent",
       borderRadius: 5,
       minHeight: 100,
       marginTop: 5,
-      borderWidth:2,
+      borderWidth: 2,
       borderColor: Theme.secondaryContainer,
     },
     eventBadges: {
@@ -318,8 +320,7 @@ export default function Profile({ navigation }) {
 
       backgroundColor: Theme.modalColor,
       borderRadius: 20,
-      padding: 35,
-      alignItems: "center",
+      padding: 10,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
@@ -375,7 +376,10 @@ export default function Profile({ navigation }) {
             />
 
             <IconButton
-              style={{ marginTop: "10%", backgroundColor: Theme.secondaryContainer }}
+              style={{
+                marginTop: "10%",
+                backgroundColor: Theme.secondaryContainer,
+              }}
               icon="image"
               iconColor="white"
               onPress={pickImage}
@@ -383,7 +387,7 @@ export default function Profile({ navigation }) {
           </View>
         </Modal>
 
-        <ScrollView style={{ marginBottom: 50, padding: 5, height:"100%" }}>
+        <ScrollView style={{ marginBottom: 50, padding: 5, height: "100%" }}>
           <View style={styles.container}>
             <View style={{ width: "49%" }}>
               <TouchableOpacity
@@ -401,17 +405,17 @@ export default function Profile({ navigation }) {
 
             <View style={styles.detailsView}>
               <IconButton
-              icon="cog-outline"
-              iconColor={Theme.color}
-              onPress={()=> navigation.navigate("Settings")}
-              style={{
-                position:"absolute",
-                right:0,
-                top:0,
-            }}
+                icon="cog-outline"
+                iconColor={Theme.color}
+                onPress={() => navigation.navigate("Settings")}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: 0,
+                }}
               />
               <Text style={styles.displayNameText}>
-                {CurrentUser?.displayName}
+                {auth.currentUser.displayName}
               </Text>
               <Text style={styles.detailTexts}>@{CurrentUser?.userName}</Text>
               <Text style={styles.detailTexts}>
@@ -433,6 +437,7 @@ export default function Profile({ navigation }) {
                       onPress={() => {
                         showEventDetailModal(!eventDetailModal);
                         setSelectedEvent(event);
+                        getEventDetails(event.eventId);
                       }}
                     >
                       <Image
@@ -455,7 +460,6 @@ export default function Profile({ navigation }) {
           </View>
 
           <View style={styles.bioView}>
-            <Divider/>
             {CurrentUser?.userDescription ? (
               <Text style={{ color: Theme.color, marginTop: 5 }}>
                 {CurrentUser.userDescription}
@@ -476,7 +480,7 @@ export default function Profile({ navigation }) {
                 onPress={() => showDescriptionModal(!descriptionModal)}
                 icon="pencil"
                 iconColor={Theme.color}
-                style={{height:25}}
+                style={{ height: 25 }}
               />
             </View>
           </View>
@@ -491,19 +495,44 @@ export default function Profile({ navigation }) {
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
+                <IconButton
+                  icon="close-thick"
+                  iconColor={Theme.danger}
+                  onPress={() => {
+                    showEventDetailModal(!eventDetailModal);
+                  }}
+                />
                 <ScrollView style={{ width: "100%" }}>
-                  <IconButton
-                    onPress={deleteEvent}
-                    icon="trash-can"
-                    iconColor={Theme.color}
-                  />
+                  <View style={{ alignItems: "center" }}>
+
+                    <View style={{ width: "70%" }}>
+                      {eventData?.map((item, index) => (
+                        <React.Fragment key={index}>
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-around",
+                              borderRadius: 5,
+                              backgroundColor: Theme.secondaryContainer,
+                              margin: 5,
+                            }}
+                          >
+                            <Text style={{ color: Theme.color, padding: 5, fontSize: 16 }}>
+                              {item.key.charAt(0).toUpperCase() + item.key.slice(1)} :
+                            </Text>
+                            <Text style={{ color: Theme.color, padding: 5, fontSize: 16 }}>{item.value}</Text>
+
+                          </View>
+                        </React.Fragment>
+                      ))}
+                    </View>
+                    <IconButton
+                      onPress={deleteEvent}
+                      icon="trash-can"
+                      iconColor={Theme.color}
+                    />
+                  </View>
                 </ScrollView>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => showEventDetailModal(!eventDetailModal)}
-                >
-                  <Text style={styles.textStyle}>Tamam</Text>
-                </Pressable>
               </View>
             </View>
           </Modal>
@@ -519,69 +548,7 @@ export default function Profile({ navigation }) {
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                <IconButton
-                style={{position:"absolute",left:0}}
-                icon="close-thick"
-                iconColor={Theme.danger}
-                onPress={() => {
-                  showEventModal(!eventModal), setEventForm(false);
-                }}
-                />
-                <ScrollView style={{ width: "100%" }}>
-                  {!eventForm ? (
-                    <>
-                      {allEvents.map((eventItem, index) => (
-                        <React.Fragment key={index}>
-                          <Pressable
-                            onPress={() => {
-                              setEventForm(true), setSelectedEvent(eventItem);
-                            }}
-                            style={({ pressed }) => [
-                              {
-                                backgroundColor: pressed
-                                  ? Theme.modalPressable
-                                  : "transparent",
-                                borderRadius: 10,
-                              },
-                            ]}
-                          >
-                            <List.Item
-                              title={eventItem.eventTitle}
-                              titleStyle={{ color: Theme.color }}
-                              left={() => (
-                                <Image
-                                  source={{
-                                    uri: eventItem.eventIconURL,
-                                  }}
-                                  resizeMode="cover"
-                                  style={{
-                                    width: 50,
-                                    height: 50,
-                                    marginLeft: 5,
-                                  }}
-                                />
-                              )}
-                              // right={() => (
-                              //   <IconButton
-                              //     icon="plus"
-                              //     onPress={() =>
-                              //       addEvent(
-                              //         eventItem.eventTitle,
-                              //         eventItem.eventId
-                              //       )
-                              //     }
-                              //   />
-                              // )}
-                            />
-                          </Pressable>
-                        </React.Fragment>
-                      ))}
-                    </>
-                  ) : (
-                    <>{forms[selectedEvent.eventTitle]}</>
-                  )}
-                </ScrollView>
-                
+                <EventForms modalVisible={modalFunction} />
               </View>
             </View>
           </Modal>
@@ -639,9 +606,7 @@ export default function Profile({ navigation }) {
               </View>
             </View>
           </Modal>
-            
         </ScrollView>
-        
       </SafeAreaView>
     </View>
   );

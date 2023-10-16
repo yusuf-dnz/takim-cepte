@@ -5,35 +5,31 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "userInterfaceStyle": "dark",
       "supportsTablet": true
     },
     "android": {
-      "userInterfaceStyle": "dark",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yuefi.TakimCepte"
+      "package": "com.yuefi.TakimCepte",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "userInterfaceStyle": "dark",
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
         "projectId": "2cf166c3-8f10-40fb-9528-105185726677"
       }
-    }
+    },
+    "plugins": ["@react-native-firebase/app"]
   }
 }
