@@ -40,9 +40,6 @@ export default function Settings({ navigation }) {
       {
         text: "Evet",
         onPress: async (e) => {
-          await updateDoc(userRef, {
-            pushToken: null,
-          });
           await signOut(auth);
         },
       },
