@@ -7,7 +7,7 @@ import { auth, db } from "../firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, getDoc } from "firebase/firestore";
 
-export default function chat_user_assets(targetUser, chatId) {
+export default function ChatUserAssets(targetUser, chatId) {
   const authId = auth.currentUser.uid;
 
   console.log("chat_user_assets", targetUser);
