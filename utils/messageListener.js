@@ -8,7 +8,7 @@ import { setChatData } from "../redux/messages";
 import chat_user_assets from "./getChatAssets";
 import { useState } from "react";
 
-export default async function messages_store() {
+export default async function messageListener() {
   const [targetUsers, setTargetUsers] = useState([]);
 
   const dispatch = useDispatch();
