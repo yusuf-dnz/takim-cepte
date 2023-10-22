@@ -43,7 +43,7 @@ const addEvent = async (title, eventId, authId, data) => {
   }
 };
 
-export function Football_Form() {
+export function FootballForm() {
   const positions = ["Kaleci", "Defans", "OrtaSaha", "Hücum"];
   return (
     <View
@@ -107,7 +107,7 @@ export function Football_Form() {
   );
 }
 
-export function Basketball_Form() {
+export function BasketballForm() {
   const positions = ["Şutör Guard", "Küçük Forvet", "Büyük Forvet", "Pivot "];
   return (
     <View
@@ -171,7 +171,7 @@ export function Basketball_Form() {
   );
 }
 
-export function Valorant_Form() {
+export function ValorantForm() {
   const agents = [
     "Brimstone",
     "Viper",
@@ -223,7 +223,7 @@ export function Valorant_Form() {
   );
 }
 
-export function LOL_Form() {
+export function LOLForm() {
   const positions = [
     "Üst koridor",
     "Ormancı",
@@ -255,7 +255,7 @@ export function LOL_Form() {
   );
 }
 
-export function CS2_Form() {
+export function CS2Form() {
   const positions = [
     "Game Leader (IGL)",
     "Supporter",
@@ -295,11 +295,11 @@ export default function EventForms({ modalVisible }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const forms = {
-    basketball: (<Basketball_Form eventData={selectedEvent} />),
-    football: <Football_Form eventData={selectedEvent} />,
-    league_of_legends: (<LOL_Form eventData={selectedEvent} />),
-    counter_strike_2: (<CS2_Form eventData={selectedEvent} />),
-    valorant: <Valorant_Form eventData={selectedEvent} />,
+    basketball: (<BasketballForm eventData={selectedEvent} />),
+    football: <FootballForm eventData={selectedEvent} />,
+    league_of_legends: (<LOLForm eventData={selectedEvent} />),
+    counter_strike_2: (<CS2Form eventData={selectedEvent} />),
+    valorant: <ValorantForm eventData={selectedEvent} />,
   };
 
 
